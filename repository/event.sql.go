@@ -7,8 +7,7 @@ package repository
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 const createEvent = `-- name: CreateEvent :one
@@ -18,10 +17,10 @@ RETURNING id, title, description, date, location
 `
 
 type CreateEventParams struct {
-	Title       string           `json:"title"`
-	Description string           `json:"description"`
-	Date        pgtype.Timestamp `json:"date"`
-	Location    string           `json:"location"`
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	Date        *time.Time `json:"date"`
+	Location    string     `json:"location"`
 }
 
 func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error) {
@@ -70,4 +69,22 @@ func (q *Queries) GetAllEvents(ctx context.Context) ([]Event, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getEvent = `-- name: GetEvent :one
+SELECT id, title, description, date, location FROM event
+WHERE id = $1
+`
+
+func (q *Queries) GetEvent(ctx context.Context, id int64) (Event, error) {
+	row := q.db.QueryRow(ctx, getEvent, id)
+	var i Event
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Description,
+		&i.Date,
+		&i.Location,
+	)
+	return i, err
 }

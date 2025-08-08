@@ -7,8 +7,6 @@ package repository
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createBooking = `-- name: CreateBooking :one
@@ -18,9 +16,9 @@ RETURNING id, account_id, event_id, quantity
 `
 
 type CreateBookingParams struct {
-	AccountID pgtype.Int4 `json:"account_id"`
-	EventID   pgtype.Int4 `json:"event_id"`
-	Quantity  pgtype.Int4 `json:"quantity"`
+	AccountID int64 `json:"account_id"`
+	EventID   int64 `json:"event_id"`
+	Quantity  int32 `json:"quantity"`
 }
 
 func (q *Queries) CreateBooking(ctx context.Context, arg CreateBookingParams) (Booking, error) {

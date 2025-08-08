@@ -5,35 +5,35 @@
 package repository
 
 import (
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 type Account struct {
-	ID    int32  `json:"id"`
+	ID    int64  `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
 }
 
 type Booking struct {
-	ID        int32       `json:"id"`
-	AccountID pgtype.Int4 `json:"account_id"`
-	EventID   pgtype.Int4 `json:"event_id"`
-	Quantity  pgtype.Int4 `json:"quantity"`
+	ID        int64 `json:"id"`
+	AccountID int64 `json:"account_id"`
+	EventID   int64 `json:"event_id"`
+	Quantity  int32 `json:"quantity"`
 }
 
 type Event struct {
-	ID          int32            `json:"id"`
-	Title       string           `json:"title"`
-	Description string           `json:"description"`
-	Date        pgtype.Timestamp `json:"date"`
-	Location    string           `json:"location"`
+	ID          int64      `json:"id"`
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	Date        *time.Time `json:"date"`
+	Location    string     `json:"location"`
 }
 
 type Ticket struct {
-	ID          int32         `json:"id"`
-	Name        string        `json:"name"`
-	Description string        `json:"description"`
-	Price       pgtype.Float8 `json:"price"`
-	Quantity    pgtype.Int4   `json:"quantity"`
-	EventID     pgtype.Int4   `json:"event_id"`
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Price       int64  `json:"price"`
+	Quantity    int32  `json:"quantity"`
+	EventID     int64  `json:"event_id"`
 }

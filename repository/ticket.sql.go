@@ -7,8 +7,6 @@ package repository
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createTicket = `-- name: CreateTicket :one
@@ -18,11 +16,11 @@ RETURNING id, name, description, price, quantity, event_id
 `
 
 type CreateTicketParams struct {
-	Name        string        `json:"name"`
-	Description string        `json:"description"`
-	Price       pgtype.Float8 `json:"price"`
-	Quantity    pgtype.Int4   `json:"quantity"`
-	EventID     pgtype.Int4   `json:"event_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Price       int64  `json:"price"`
+	Quantity    int32  `json:"quantity"`
+	EventID     int64  `json:"event_id"`
 }
 
 func (q *Queries) CreateTicket(ctx context.Context, arg CreateTicketParams) (Ticket, error) {
@@ -74,4 +72,35 @@ func (q *Queries) GetAllTickets(ctx context.Context) ([]Ticket, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getTicket = `-- name: GetTicket :one
+SELECT ticket.id, ticket.name, ticket.description, ticket.price, ticket.quantity, ticket.event_id, event.id, event.title, event.description, event.date, event.location
+FROM ticket
+JOIN event ON event.id == ticket.event_id
+WHERE ticket.id = $1
+`
+
+type GetTicketRow struct {
+	Ticket Ticket `json:"ticket"`
+	Event  Event  `json:"event"`
+}
+
+func (q *Queries) GetTicket(ctx context.Context, id int64) (GetTicketRow, error) {
+	row := q.db.QueryRow(ctx, getTicket, id)
+	var i GetTicketRow
+	err := row.Scan(
+		&i.Ticket.ID,
+		&i.Ticket.Name,
+		&i.Ticket.Description,
+		&i.Ticket.Price,
+		&i.Ticket.Quantity,
+		&i.Ticket.EventID,
+		&i.Event.ID,
+		&i.Event.Title,
+		&i.Event.Description,
+		&i.Event.Date,
+		&i.Event.Location,
+	)
+	return i, err
 }
