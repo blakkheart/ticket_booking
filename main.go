@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -37,16 +36,6 @@ func main() {
 	loggedMux := loggingMiddleware(mux)
 
 	fmt.Println("Server started")
-
-	q := repository.New(repository.DB.Conn)
-	// fmt.Println(q.CreateAccount(repository.DB.Ctx,
-	// 	repository.CreateAccountParams{
-	// 		Name:  "somename",
-	// 		Email: "elseemail",
-	// 	}))
-	acc, _ := q.GetAllAccounts(repository.DB.Ctx)
-	js, _ := json.Marshal(acc)
-	fmt.Print(string(js))
 
 	err := http.ListenAndServe("localhost:8080", loggedMux)
 	if err != nil {
