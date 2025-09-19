@@ -10,37 +10,48 @@ import (
 )
 
 const createAccount = `-- name: CreateAccount :one
-INSERT INTO account (name, email)
-VALUES ($1, $2)
-RETURNING id, name, email
+INSERT INTO account (name, email, password)
+VALUES ($1, $2, $3)
+RETURNING id, name, email, password
 `
 
 type CreateAccountParams struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
-	row := q.db.QueryRow(ctx, createAccount, arg.Name, arg.Email)
+	row := q.db.QueryRow(ctx, createAccount, arg.Name, arg.Email, arg.Password)
 	var i Account
-	err := row.Scan(&i.ID, &i.Name, &i.Email)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
+	)
 	return i, err
 }
 
 const getAccount = `-- name: GetAccount :one
-SELECT id, name, email FROM account
+SELECT id, name, email, password FROM account
 WHERE id = $1
 `
 
 func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
 	row := q.db.QueryRow(ctx, getAccount, id)
 	var i Account
-	err := row.Scan(&i.ID, &i.Name, &i.Email)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
+	)
 	return i, err
 }
 
 const getAllAccounts = `-- name: GetAllAccounts :many
-SELECT id, name, email FROM account
+SELECT id, name, email, password FROM account
 `
 
 func (q *Queries) GetAllAccounts(ctx context.Context) ([]Account, error) {
@@ -52,7 +63,12 @@ func (q *Queries) GetAllAccounts(ctx context.Context) ([]Account, error) {
 	var items []Account
 	for rows.Next() {
 		var i Account
-		if err := rows.Scan(&i.ID, &i.Name, &i.Email); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.Password,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

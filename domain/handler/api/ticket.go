@@ -10,23 +10,6 @@ import (
 	"ticket-booking/repository"
 )
 
-func createUser(w http.ResponseWriter, r *http.Request) {
-	var user repository.Account
-	err := json.NewDecoder(r.Body).Decode(&user)
-
-	status := http.StatusOK
-
-	if err != nil {
-		log.Fatal("Parsing Error")
-		status = http.StatusBadRequest
-	}
-	//do something with user
-	log.Println(user)
-
-	u := config.ContainerService.Service.CreateAccount(user)
-	WriteJsonResponse(w, u, status)
-}
-
 func getBooking(w http.ResponseWriter, r *http.Request) {
 	//id64, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
 	user := config.ContainerService.Service.GetUser()

@@ -59,22 +59,23 @@ func getPayload(tokenString string) (jwt.MapClaims, error) {
 	}
 }
 
-func getAuthorization(r *http.Request) {
+func getTokenSub(r *http.Request) (string, error) {
 	token, err := getToken(r)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	payload, err := getPayload(token)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	sub, err := payload.GetSubject()
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
-	print(sub)
+
+	return sub, nil
 
 }
 

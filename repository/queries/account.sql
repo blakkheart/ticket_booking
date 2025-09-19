@@ -2,8 +2,8 @@
 SELECT * FROM account;
 
 -- name: CreateAccount :one
-INSERT INTO account (name, email)
-VALUES ($1, $2)
+INSERT INTO account (name, email, password)
+VALUES ($1, $2, $3)
 RETURNING *;
 
 -- name: GetAccount :one

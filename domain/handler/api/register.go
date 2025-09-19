@@ -40,7 +40,6 @@ var jwtSecretKey = []byte("super-duper-secret-key")
 
 func login(w http.ResponseWriter, r *http.Request) {
 	account := config.ContainerService.Service.GetUser()
-	//regReq := LoginRequest{}
 
 	token := generateToken(account)
 
@@ -51,5 +50,5 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 func authorize(w http.ResponseWriter, r *http.Request) {
 
-	getAuthorization(r)
+	getTokenSub(r)
 }

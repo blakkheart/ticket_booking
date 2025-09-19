@@ -3,7 +3,8 @@
 CREATE TABLE account (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL
+    email VARCHAR(255) NOT NULL,
+    password VARCHAR(128) NOT NULL
 );
 CREATE TABLE event (
     id BIGSERIAL PRIMARY KEY,
