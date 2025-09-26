@@ -7,7 +7,10 @@ import (
 	"time"
 
 	"ticket-booking/domain/handler/api"
+	"ticket-booking/middleware"
 	"ticket-booking/repository"
+
+	"github.com/casbin/casbin/v2"
 )
 
 func UnknownHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,6 +28,12 @@ func loggingMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
+
+	authEnforcer, authErr := casbin.NewEnforcer("./auth_model.conf", "./policy.csv")
+	if authErr != nil {
+		log.Fatal(authErr)
+	}
+
 	repository.CreateConnection()
 	defer repository.DB.Conn.Close(repository.DB.Ctx)
 
@@ -33,11 +42,9 @@ func main() {
 	api.RegisterRoutes(mux, "/api")
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) { UnknownHandler(w, r) })
 
-	loggedMux := loggingMiddleware(mux)
-
 	fmt.Println("Server started")
 
-	err := http.ListenAndServe("localhost:8080", loggedMux)
+	err := http.ListenAndServe("localhost:8080", loggingMiddleware(middleware.Authorizer(authEnforcer, mux)))
 	if err != nil {
 		fmt.Println("Error starting the server:", err)
 	}

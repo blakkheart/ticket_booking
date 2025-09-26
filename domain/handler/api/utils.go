@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -79,9 +80,42 @@ func getTokenSub(r *http.Request) (string, error) {
 
 }
 
+func parseTokenSub(jsonString string) (repository.Account, error) {
+	var acc repository.Account
+	err := json.Unmarshal([]byte(jsonString), &acc)
+	if err != nil {
+		return repository.Account{}, err
+	}
+	return acc, nil
+}
+
+func GetAccountFromToken(r *http.Request) (repository.Account, error) {
+	sub, err := getTokenSub(r)
+	if err != nil {
+		return repository.Account{}, err
+	}
+	acc, err := parseTokenSub(sub)
+	if err != nil {
+		return repository.Account{}, err
+	}
+
+	return acc, nil
+}
+
+func generateSub(account *repository.Account) string {
+	jsonBytes, err := json.Marshal(account)
+	if err != nil {
+		log.Fatal("generateSub: ", err)
+	}
+	jsonString := string(jsonBytes)
+	fmt.Println(jsonString)
+	return jsonString
+}
+
 func generateToken(account repository.Account) string {
+	sub := generateSub(&account)
 	payload := jwt.MapClaims{
-		"sub": account.Email,
+		"sub": sub,
 		"iss": "ticket-booking",
 		"exp": time.Now().Add(time.Hour * 72).Unix(),
 		"iat": time.Now().Unix(),

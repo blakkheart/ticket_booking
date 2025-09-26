@@ -14,7 +14,7 @@ type Service struct {
 func (service *Service) Get(id int) int {
 	value, err := service.Repo.Get(id)
 	if err != nil {
-		log.Fatal("Something wrong with repo")
+		log.Fatal(err)
 	}
 	return value
 }
@@ -33,7 +33,7 @@ func (service *Service) GetUser() repository.Account {
 func (service *Service) CreateAccount(user repository.Account) repository.Account {
 	value, err := service.Repo.Create(user)
 	if err != nil {
-		log.Fatal("Something wrong with repo")
+		log.Fatal(err)
 	}
 	return value
 }
@@ -42,7 +42,7 @@ func (service *Service) GetEvent(id int64) repository.Event {
 	//event_date := time.Date(2025, time.April, 15, 20, 0, 0, 0, time.UTC)
 	event, err := service.Repo.GetEvent(id)
 	if err != nil {
-		log.Fatal("Something wrong with repo")
+		log.Fatal(err)
 	}
 	return event
 }
@@ -50,7 +50,7 @@ func (service *Service) GetEvent(id int64) repository.Event {
 func (service *Service) CreateEvent(event_param repository.CreateEventParams) repository.Event {
 	value, err := service.Repo.CreateEvent(event_param)
 	if err != nil {
-		log.Fatal("Something wrong with repo")
+		log.Fatal(err)
 	}
 	return value
 }
