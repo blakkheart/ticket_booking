@@ -15,11 +15,13 @@ func Authorizer(e *casbin.Enforcer, next http.Handler) http.Handler {
 		account, err := api.GetAccountFromToken(r)
 
 		if err != nil {
-			role = "anonymus"
+			role = "anonymous"
 		} else {
-			role = "admin"
+			role = account.Role
 		}
 		log.Print("token sub: ", account)
+		log.Print("role: ", role)
+		log.Print("path: ", r.URL.Path)
 
 		res, err := e.Enforce(role, r.URL.Path, r.Method)
 

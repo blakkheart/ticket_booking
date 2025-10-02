@@ -57,6 +57,7 @@ func (service *UserService) Create(user model.AccountIn) repository.Account {
 		Name:     user.Name,
 		Email:    user.Email,
 		Password: user.Password,
+		Role:     model.Anonymous,
 	}
 
 	value, err := service.Repo.Create(u)
