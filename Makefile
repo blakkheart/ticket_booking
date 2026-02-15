@@ -4,3 +4,6 @@ migrate-up:
 
 migrate-down:
 	goose -dir="repository/migrations" postgres postgresql://wowsp:wowsp@localhost:5432/booking down
+
+create_db:
+	docker exec -it postgres psql --u wowsp -c 'create database booking'
