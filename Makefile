@@ -7,3 +7,6 @@ migrate-down:
 
 generate-sql:
 	sqlc generate
+
+create_db:
+	docker exec -it postgres psql --u wowsp -c 'create database booking'
