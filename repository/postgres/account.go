@@ -2,16 +2,17 @@ package postgres
 
 import (
 	"ticket-booking/domain/model"
+	"ticket-booking/models/database"
 	"ticket-booking/repository"
 )
 
 type BaseRepository struct {
-	//DB *sql.DB
+	DB *database.DBStruct
 }
 
 func (repo *BaseRepository) Create(user *model.AccountIn) (*model.Account, error) {
-	q := repository.New(repository.DB.Conn)
-	account, err := q.CreateAccount(repository.DB.Ctx,
+	q := repository.New(repo.DB.Conn)
+	account, err := q.CreateAccount(repo.DB.Ctx,
 		repository.CreateAccountParams{
 			Name:  user.Name,
 			Email: user.Email,

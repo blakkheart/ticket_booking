@@ -5,18 +5,18 @@ import (
 	db "ticket-booking/repository"
 )
 
-type containerServiceStruct struct {
+type СontainerServiceStruct struct {
 	Service *service.Service
 }
 
-var ContainerService containerServiceStruct = CreateContainerService()
+var ContainerService СontainerServiceStruct = CreateContainerService()
 
-func CreateContainerService() containerServiceStruct {
+func CreateContainerService() СontainerServiceStruct {
 	// database := db.Connect()
 
 	repo := &db.BaseRepository{}
 
 	service := service.Service{Repo: repo}
 
-	return containerServiceStruct{Service: &service}
+	return СontainerServiceStruct {Service: &service}
 }

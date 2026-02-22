@@ -20,11 +20,14 @@ func Authorizer(e *casbin.Enforcer, next http.Handler) http.Handler {
 		} else {
 			role = account.Role
 		}
-		log.Print("token sub: ", account)
-		log.Print("role: ", role)
-		log.Print("path: ", r.URL.Path)
+		log.Printf("Enforcing: role=%s, path=%s, method=%s", role, r.URL.Path, r.Method)
 
-		res, err := e.Enforce(role, r.URL.Path, r.Method)
+		// Get all policies for this role
+		policies, _ := e.GetFilteredPolicy(0, string(role))
+		log.Printf("Policies for %s: %v", role, policies)
+
+
+		res, err := e.Enforce(string(role), r.URL.Path, r.Method)
 
 		if err != nil {
 			log.Fatal("middleware auth: ", err)

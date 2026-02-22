@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"ticket-booking/config"
 	"ticket-booking/domain/handler/api"
 	"ticket-booking/middleware"
-	"ticket-booking/repository"
+	"ticket-booking/repository/postgres"
 
 	"github.com/casbin/casbin/v2"
 )
@@ -29,13 +30,15 @@ func loggingMiddleware(next http.Handler) http.Handler {
 
 func main() {
 
+	config.ReadConfigs()
+
 	authEnforcer, authErr := casbin.NewEnforcer("./auth_model.conf", "./policy.csv")
 	if authErr != nil {
 		log.Fatal(authErr)
 	}
 
-	repository.CreateConnection()
-	defer repository.DB.Conn.Close(repository.DB.Ctx)
+	postgres.CreateConnection(&config.DBConfig)
+	defer postgres.DB.Conn.Close(postgres.DB.Ctx)
 
 	mux := http.NewServeMux()
 

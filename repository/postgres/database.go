@@ -1,34 +1,24 @@
-package repository
+package postgres
 
 import (
 	"context"
 	"fmt"
 	"log"
+	"ticket-booking/config"
+	"ticket-booking/models/database"
+	"ticket-booking/repository"
 
 	"github.com/jackc/pgx/v5"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "wowsp"
-	dbname   = "booking"
-	password = "wowsp"
-)
+var DB database.DBStruct = database.DBStruct{}
 
-type db struct {
-	Ctx  context.Context
-	Conn *pgx.Conn
-}
-
-var DB db = db{}
-
-func CreateConnection() {
+func CreateConnection(dbConf *config.DBConfigStruct) {
 	var dsn string = fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbConf.Host, dbConf.Port, dbConf.User, dbConf.Password, dbConf.DBname)
 
 	ctx := context.Background()
 
@@ -46,10 +36,10 @@ func CreateConnection() {
 
 }
 
-func CreateConnectionGorm() *gorm.DB {
+func CreateConnectionGorm(dbConf *config.DBConfigStruct) *gorm.DB {
 	var dsn string = fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbConf.Host, dbConf.Port, dbConf.User, dbConf.Password, dbConf.DBname)
 
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN: dsn,
@@ -64,7 +54,7 @@ func CreateConnectionGorm() *gorm.DB {
 
 func WithTransaction(
 	ctx context.Context,
-	fn func(*Queries) error,
+	fn func(*repository.Queries) error,
 ) error {
 
 	tx, err := DB.Conn.BeginTx(ctx, pgx.TxOptions{})
@@ -72,7 +62,7 @@ func WithTransaction(
 		return err
 	}
 
-	q := New(tx)
+	q := repository.New(tx)
 
 	if err := fn(q); err != nil {
 		tx.Rollback(ctx)
