@@ -3,7 +3,7 @@ package service
 import (
 	"log"
 
-	model_interface "ticket-booking/domain/model/interface"
+	model_interface "ticket-booking/models/domain/interface"
 	"ticket-booking/repository"
 )
 

@@ -7,15 +7,15 @@ package repository
 import (
 	"time"
 
-	"ticket-booking/domain/model"
+	"ticket-booking/models/domain/account"
 )
 
 type Account struct {
-	ID       int64      `json:"id"`
-	Name     string     `json:"name"`
-	Email    string     `json:"email"`
-	Password string     `json:"password"`
-	Role     model.Role `json:"role"`
+	ID       int64        `json:"id"`
+	Name     string       `json:"name"`
+	Email    string       `json:"email"`
+	Password string       `json:"password"`
+	Role     account.Role `json:"role"`
 }
 
 type Booking struct {

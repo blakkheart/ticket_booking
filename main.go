@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"ticket-booking/config"
 	"ticket-booking/domain/handler/api"
@@ -14,25 +13,11 @@ import (
 	"github.com/casbin/casbin/v2"
 )
 
-func UnknownHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprint(w, "404 error")
-}
-
-func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		log.Printf("Started %s %s", r.Method, r.URL.Path)
-		next.ServeHTTP(w, r)
-		log.Printf("Finished in %v", time.Since(start))
-	})
-}
-
 func main() {
 
 	config.ReadConfigs()
 
-	authEnforcer, authErr := casbin.NewEnforcer("./auth_model.conf", "./policy.csv")
+	authEnforcer, authErr := casbin.NewEnforcer("./config/casbin/auth_model.conf", "./config/casbin/policy.csv")
 	if authErr != nil {
 		log.Fatal(authErr)
 	}
@@ -43,11 +28,10 @@ func main() {
 	mux := http.NewServeMux()
 
 	api.RegisterRoutes(mux, "/api")
-	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) { UnknownHandler(w, r) })
 
 	fmt.Println("Server started")
 
-	err := http.ListenAndServe("localhost:8080", loggingMiddleware(middleware.Authorizer(authEnforcer, mux)))
+	err := http.ListenAndServe("localhost:8080", middleware.LoggingMiddleware(middleware.Authorizer(authEnforcer, mux)))
 	if err != nil {
 		fmt.Println("Error starting the server:", err)
 	}

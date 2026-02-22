@@ -8,7 +8,7 @@ package repository
 import (
 	"context"
 
-	"ticket-booking/domain/model"
+	"ticket-booking/models/domain/account"
 )
 
 const createAccount = `-- name: CreateAccount :one
@@ -18,10 +18,10 @@ RETURNING id, name, email, password, role
 `
 
 type CreateAccountParams struct {
-	Name     string     `json:"name"`
-	Email    string     `json:"email"`
-	Password string     `json:"password"`
-	Role     model.Role `json:"role"`
+	Name     string       `json:"name"`
+	Email    string       `json:"email"`
+	Password string       `json:"password"`
+	Role     account.Role `json:"role"`
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {

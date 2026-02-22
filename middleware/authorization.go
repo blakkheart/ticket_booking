@@ -5,18 +5,18 @@ import (
 	"net/http"
 
 	"ticket-booking/domain/handler/api"
-	"ticket-booking/domain/model"
+	account_model "ticket-booking/models/domain/account"
 
 	"github.com/casbin/casbin/v2"
 )
 
 func Authorizer(e *casbin.Enforcer, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var role model.Role
+		var role account_model.Role
 		account, err := api.GetAccountFromToken(r)
 
 		if err != nil {
-			role = model.Anonymous
+			role = account_model.Anonymous
 		} else {
 			role = account.Role
 		}
@@ -25,7 +25,6 @@ func Authorizer(e *casbin.Enforcer, next http.Handler) http.Handler {
 		// Get all policies for this role
 		policies, _ := e.GetFilteredPolicy(0, string(role))
 		log.Printf("Policies for %s: %v", role, policies)
-
 
 		res, err := e.Enforce(string(role), r.URL.Path, r.Method)
 

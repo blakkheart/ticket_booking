@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -40,6 +41,7 @@ var jwtSecretKey = []byte("super-duper-secret-key")
 
 func login(w http.ResponseWriter, r *http.Request) {
 	account := config.ContainerService.Service.GetUser()
+	fmt.Println(account)
 
 	token := generateToken(account)
 

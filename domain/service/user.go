@@ -5,8 +5,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"ticket-booking/domain/model"
-	model_interface "ticket-booking/domain/model/interface"
+	model "ticket-booking/models/domain/account"
+	model_interface "ticket-booking/models/domain/interface"
 	"ticket-booking/repository"
 )
 

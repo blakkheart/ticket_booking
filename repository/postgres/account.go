@@ -1,8 +1,8 @@
 package postgres
 
 import (
-	"ticket-booking/domain/model"
 	"ticket-booking/models/database"
+	accountModel "ticket-booking/models/domain/account"
 	"ticket-booking/repository"
 )
 
@@ -10,7 +10,7 @@ type BaseRepository struct {
 	DB *database.DBStruct
 }
 
-func (repo *BaseRepository) Create(user *model.AccountIn) (*model.Account, error) {
+func (repo *BaseRepository) Create(user *accountModel.AccountIn) (*accountModel.Account, error) {
 	q := repository.New(repo.DB.Conn)
 	account, err := q.CreateAccount(repo.DB.Ctx,
 		repository.CreateAccountParams{
@@ -21,8 +21,8 @@ func (repo *BaseRepository) Create(user *model.AccountIn) (*model.Account, error
 	return repo.fromSqlcAccount(&account), err
 }
 
-func (repo *BaseRepository) fromSqlcAccount(a *repository.Account) *model.Account {
-	account := &model.Account{
+func (repo *BaseRepository) fromSqlcAccount(a *repository.Account) *accountModel.Account {
+	account := &accountModel.Account{
 		ID:    a.ID,
 		Email: a.Email,
 		Name:  a.Name,

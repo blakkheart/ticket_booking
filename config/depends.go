@@ -18,5 +18,5 @@ func CreateContainerService() СontainerServiceStruct {
 
 	service := service.Service{Repo: repo}
 
-	return СontainerServiceStruct {Service: &service}
+	return СontainerServiceStruct{Service: &service}
 }
