@@ -2,13 +2,14 @@ package repository
 
 import (
 	"ticket-booking/models/database"
+	accountModel "ticket-booking/models/domain/account"
 )
 
 type BaseRepository struct {
 	DB *database.DBStruct
 }
 
-func (repo *BaseRepository) Create(user Account) (Account, error) {
+func (repo *BaseRepository) Create(user accountModel.AccountIn) (Account, error) {
 	q := New(repo.DB.Conn)
 	account, err := q.CreateAccount(repo.DB.Ctx,
 		CreateAccountParams{
@@ -19,15 +20,16 @@ func (repo *BaseRepository) Create(user Account) (Account, error) {
 	return account, err
 }
 
-func (repo *BaseRepository) Delete(id int) (int, error) {
-	var count int = 2
-	return count, nil
+func (repo *BaseRepository) Delete(id int64) error {
+	return nil
 }
-func (repo *BaseRepository) Get(id int) (int, error) {
-	var count int = 3
-	return count, nil
+
+func (repo *BaseRepository) Get(id int64) (Account, error) {
+	return Account{}, nil
 }
-func (repo *BaseRepository) GetMany(filter any) {
+
+func (repo *BaseRepository) GetMany(filter any) ([]Account, error) {
+	return []Account{}, nil
 
 }
 

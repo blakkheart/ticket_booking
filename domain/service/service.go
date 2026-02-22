@@ -3,15 +3,16 @@ package service
 import (
 	"log"
 
-	model_interface "ticket-booking/models/domain/interface"
+	accountModel "ticket-booking/models/domain/account"
+	modelInterface "ticket-booking/models/domain/interface"
 	"ticket-booking/repository"
 )
 
 type Service struct {
-	Repo model_interface.BaseRepository
+	Repo modelInterface.IAccountRepository
 }
 
-func (service *Service) Get(id int) int {
+func (service *Service) Get(id int64) repository.Account {
 	value, err := service.Repo.Get(id)
 	if err != nil {
 		log.Fatal(err)
@@ -30,7 +31,7 @@ func (service *Service) GetUser() repository.Account {
 	}
 }
 
-func (service *Service) CreateAccount(user repository.Account) repository.Account {
+func (service *Service) CreateAccount(user accountModel.AccountIn) repository.Account {
 	value, err := service.Repo.Create(user)
 	if err != nil {
 		log.Fatal(err)
@@ -38,22 +39,22 @@ func (service *Service) CreateAccount(user repository.Account) repository.Accoun
 	return value
 }
 
-func (service *Service) GetEvent(id int64) repository.Event {
-	//event_date := time.Date(2025, time.April, 15, 20, 0, 0, 0, time.UTC)
-	event, err := service.Repo.GetEvent(id)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return event
-}
+// func (service *Service) GetEvent(id int64) repository.Event {
+// 	//event_date := time.Date(2025, time.April, 15, 20, 0, 0, 0, time.UTC)
+// 	event, err := service.Repo.GetEvent(id)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	return event
+// }
 
-func (service *Service) CreateEvent(event_param repository.CreateEventParams) repository.Event {
-	value, err := service.Repo.CreateEvent(event_param)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return value
-}
+// func (service *Service) CreateEvent(event_param repository.CreateEventParams) repository.Event {
+// 	value, err := service.Repo.CreateEvent(event_param)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	return value
+// }
 
 func (service *Service) GetBooking(user repository.Account, event repository.Event) repository.Booking {
 	return repository.Booking{

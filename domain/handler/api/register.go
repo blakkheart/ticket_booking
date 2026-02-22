@@ -8,11 +8,11 @@ import (
 	"net/http"
 
 	"ticket-booking/config"
-	"ticket-booking/repository"
+	accountModel "ticket-booking/models/domain/account"
 )
 
 func createAccount(w http.ResponseWriter, r *http.Request) {
-	var user repository.Account
+	var user accountModel.AccountIn
 	status := http.StatusOK
 
 	err := json.NewDecoder(r.Body).Decode(&user)

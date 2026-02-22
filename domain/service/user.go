@@ -24,7 +24,7 @@ func (service *UserService) verifyPassword(hashed string, password string) bool 
 	return err == nil
 }
 
-func (service *UserService) Get(id int) int {
+func (service *UserService) Get(id int64) repository.Account {
 	value, err := service.Repo.Get(id)
 	if err != nil {
 		log.Fatal("Something wrong with repo")
@@ -53,11 +53,10 @@ func (service *UserService) Create(user model.AccountIn) repository.Account {
 
 	user.Password = hashedPassword
 
-	u := repository.CreateAccountParams{
+	u := model.AccountIn{
 		Name:     user.Name,
 		Email:    user.Email,
 		Password: user.Password,
-		Role:     model.Anonymous,
 	}
 
 	value, err := service.Repo.Create(u)

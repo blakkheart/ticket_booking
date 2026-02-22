@@ -4,18 +4,17 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
 
-	"ticket-booking/config"
 	"ticket-booking/repository"
 )
 
 func getBooking(w http.ResponseWriter, r *http.Request) {
 	//id64, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
-	user := config.ContainerService.Service.GetUser()
-	event := config.ContainerService.Service.GetEvent(32)
+	// user := config.ContainerService.Service.GetUser()
+	// event := config.ContainerService.Service.GetEvent(32)
 
-	get_model := config.ContainerService.Service.GetBooking(user, event)
+	// get_model := config.ContainerService.Service.GetBooking(user, event)
+	get_model := 1
 
 	status := http.StatusOK
 
@@ -32,19 +31,21 @@ func createEvent(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println(event_param)
 
-	event := config.ContainerService.Service.CreateEvent(event_param)
+	// event := config.ContainerService.Service.CreateEvent(event_param)
+	event := 1
 	WriteJsonResponse(w, event, status)
 }
 
 func getEvent(w http.ResponseWriter, r *http.Request) {
-	id64, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
+	// id64, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
 	status := http.StatusOK
 
 	if err != nil {
 		log.Fatal("Something wrong with service")
 	}
 
-	event := config.ContainerService.Service.GetEvent(id64)
+	// event := config.ContainerService.Service.GetEvent(id64)
+	event := 1
 
 	WriteJsonResponse(w, event, status)
 }
