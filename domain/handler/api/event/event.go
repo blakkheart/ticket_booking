@@ -1,25 +1,13 @@
-package api
+package event
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
 
+	"ticket-booking/domain/handler/api/helper"
 	"ticket-booking/repository"
 )
-
-func getBooking(w http.ResponseWriter, r *http.Request) {
-	//id64, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
-	// user := config.ContainerService.Service.GetUser()
-	// event := config.ContainerService.Service.GetEvent(32)
-
-	// get_model := config.ContainerService.Service.GetBooking(user, event)
-	get_model := 1
-
-	status := http.StatusOK
-
-	WriteJsonResponse(w, get_model, status)
-}
 
 func createEvent(w http.ResponseWriter, r *http.Request) {
 	var event_param repository.CreateEventParams
@@ -33,21 +21,19 @@ func createEvent(w http.ResponseWriter, r *http.Request) {
 
 	// event := config.ContainerService.Service.CreateEvent(event_param)
 	event := 1
-	WriteJsonResponse(w, event, status)
+	helper.WriteJsonResponse(w, event, status)
 }
 
 func getEvent(w http.ResponseWriter, r *http.Request) {
 	// id64, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
 	status := http.StatusOK
 
-	if err != nil {
-		log.Fatal("Something wrong with service")
-	}
+	// if err != nil {
+	// 	log.Fatal("Something wrong with service")
+	// }
 
 	// event := config.ContainerService.Service.GetEvent(id64)
 	event := 1
 
-	WriteJsonResponse(w, event, status)
+	helper.WriteJsonResponse(w, event, status)
 }
-
-func createTicket(w http.ResponseWriter, r *http.Request) {}

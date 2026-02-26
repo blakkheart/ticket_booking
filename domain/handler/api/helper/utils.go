@@ -1,4 +1,4 @@
-package api
+package helper
 
 import (
 	"encoding/json"
@@ -12,6 +12,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 )
+
+var jwtSecretKey = []byte("super-duper-secret-key")
 
 func WriteJsonResponse(w http.ResponseWriter, model any, status int) {
 	jData, err := json.Marshal(model)
@@ -112,7 +114,7 @@ func generateSub(account *repository.Account) string {
 	return jsonString
 }
 
-func generateToken(account repository.Account) string {
+func GenerateToken(account repository.Account) string {
 	sub := generateSub(&account)
 	payload := jwt.MapClaims{
 		"sub": sub,

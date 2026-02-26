@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"ticket-booking/domain/handler/api"
+	"ticket-booking/domain/handler/api/helper"
 	account_model "ticket-booking/models/domain/account"
 
 	"github.com/casbin/casbin/v2"
@@ -13,7 +13,7 @@ import (
 func Authorizer(e *casbin.Enforcer, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var role account_model.Role
-		account, err := api.GetAccountFromToken(r)
+		account, err := helper.GetAccountFromToken(r)
 
 		if err != nil {
 			role = account_model.Anonymous

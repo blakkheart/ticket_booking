@@ -1,22 +1,24 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
+
+	"ticket-booking/domain/handler/api/auth"
+	"ticket-booking/domain/handler/api/booking"
+	"ticket-booking/domain/handler/api/event"
+	"ticket-booking/domain/handler/api/ticket"
+	"ticket-booking/domain/handler/api/user"
+
+	"ticket-booking/domain/handler/api/helper"
 )
 
-func RegisterRoutes(router *http.ServeMux, prefix string) {
-	addHandler(router, http.MethodPost, fmt.Sprintf("%s/register", prefix), createAccount)
-	addHandler(router, http.MethodGet, fmt.Sprintf("%s/book", prefix), getBooking)
-	addHandler(router, http.MethodPost, fmt.Sprintf("%s/event", prefix), createEvent)
-	addHandler(router, http.MethodGet, fmt.Sprintf("%s/event/{id}", prefix), getEvent)
-	addHandler(router, http.MethodPost, fmt.Sprintf("%s/ticket", prefix), createTicket)
-	addHandler(router, http.MethodPost, fmt.Sprintf("%s/login", prefix), login)
-	addHandler(router, http.MethodGet, fmt.Sprintf("%s/auth", prefix), authorize)
-}
+func RegisterRoutes(mux *http.ServeMux, prefix string) {
+	router := helper.NewRouter(mux, prefix)
 
-type handlerFunc func(w http.ResponseWriter, r *http.Request)
+	router.Include(event.Routes)
+	router.Include(auth.Routes)
+	router.Include(ticket.Routes)
+	router.Include(user.Routes)
+	router.Include(booking.Routes)
 
-func addHandler(router *http.ServeMux, method string, path string, handlerFunc handlerFunc) {
-	router.HandleFunc(fmt.Sprintf("%s %s", method, path), func(w http.ResponseWriter, r *http.Request) { handlerFunc(w, r) })
 }
