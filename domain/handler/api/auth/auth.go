@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"ticket-booking/config"
+	container "ticket-booking/config/service_container"
 	"ticket-booking/domain/handler/api/helper"
 )
 
@@ -18,7 +18,7 @@ type LoginResponse struct {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	account := config.ContainerService.Service.GetUser()
+	account := container.ContainerService.AccountService.GetUser()
 	fmt.Println(account)
 
 	token := helper.GenerateToken(account)

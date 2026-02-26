@@ -12,7 +12,7 @@ type Service struct {
 	Repo modelInterface.IAccountRepository
 }
 
-func (service *Service) Get(id int64) repository.Account {
+func (service *Service) Get(id int64) *accountModel.Account {
 	value, err := service.Repo.Get(id)
 	if err != nil {
 		log.Fatal(err)
@@ -31,7 +31,7 @@ func (service *Service) GetUser() repository.Account {
 	}
 }
 
-func (service *Service) CreateAccount(user accountModel.AccountIn) repository.Account {
+func (service *Service) CreateAccount(user *accountModel.AccountIn) *accountModel.Account {
 	value, err := service.Repo.Create(user)
 	if err != nil {
 		log.Fatal(err)

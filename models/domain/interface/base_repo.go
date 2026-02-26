@@ -10,8 +10,8 @@ package model_interface
 // }
 
 type IBaseRepository[T any, CreateDTO any] interface {
-	Create(dto CreateDTO) (T, error)
+	Create(dto *CreateDTO) (*T, error)
 	Delete(id int64) error
-	Get(id int64) (T, error)
-	GetMany(filter any) ([]T, error)
+	Get(id int64) (*T, error)
+	GetMany(filter any) ([]*T, error)
 }

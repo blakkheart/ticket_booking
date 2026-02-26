@@ -21,6 +21,18 @@ func (repo *BaseRepository) Create(user *accountModel.AccountIn) (*accountModel.
 	return repo.fromSqlcAccount(&account), err
 }
 
+func (repo *BaseRepository) Delete(id int64) error {
+	return nil
+}
+
+func (repo *BaseRepository) Get(id int64) (*accountModel.Account, error) {
+	return nil, nil
+}
+
+func (repo *BaseRepository) GetMany(filter any) ([]*accountModel.Account, error) {
+	return nil, nil
+}
+
 func (repo *BaseRepository) fromSqlcAccount(a *repository.Account) *accountModel.Account {
 	account := &accountModel.Account{
 		ID:    a.ID,
