@@ -11,16 +11,16 @@ import (
 )
 
 func createAccount(w http.ResponseWriter, r *http.Request) {
-	var user *accountModel.AccountIn
+	var user accountModel.AccountIn
 	status := http.StatusOK
 
-	err := json.NewDecoder(r.Body).Decode(user)
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Fatal("Parsing Error")
 	}
 	//do something with user
 	log.Println(user)
 
-	u := container.ContainerService.AccountService.CreateAccount(user)
+	u := container.ContainerService.AccountService.CreateAccount(&user)
 	helper.WriteJsonResponse(w, u, status)
 }

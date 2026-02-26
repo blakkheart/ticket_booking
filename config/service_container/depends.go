@@ -2,6 +2,7 @@ package container
 
 import (
 	"ticket-booking/domain/service"
+	"ticket-booking/models/database"
 	"ticket-booking/repository/postgres"
 )
 
@@ -9,13 +10,15 @@ type ContainerServiceStruct struct {
 	AccountService *service.Service
 }
 
-var ContainerService *ContainerServiceStruct = CreateContainerService()
+var ContainerService *ContainerServiceStruct = &ContainerServiceStruct{}
 
-func CreateContainerService() *ContainerServiceStruct {
-	// database := db.Connect()
+func InitContainerService(dbConn *database.DBStruct) {
 
-	accountRepo := &postgres.BaseRepository{}
+	// init repos
+	accountRepo := &postgres.BaseRepository{DB: dbConn}
+
+	// init services
 	accountService := service.Service{Repo: accountRepo}
 
-	return &ContainerServiceStruct{AccountService: &accountService}
+	ContainerService.AccountService = &accountService
 }

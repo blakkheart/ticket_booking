@@ -15,7 +15,7 @@ import (
 
 var DB database.DBStruct = database.DBStruct{}
 
-func CreateConnection(dbConf *config.DBConfigStruct) {
+func CreateConnection(dbConf *config.DBConfigStruct) *database.DBStruct {
 	var dsn string = fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		dbConf.Host, dbConf.Port, dbConf.User, dbConf.Password, dbConf.DBname)
@@ -34,6 +34,7 @@ func CreateConnection(dbConf *config.DBConfigStruct) {
 	DB.Ctx = ctx
 	DB.Conn = conn
 
+	return &DB
 }
 
 func CreateConnectionGorm(dbConf *config.DBConfigStruct) *gorm.DB {

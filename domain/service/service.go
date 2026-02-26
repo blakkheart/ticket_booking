@@ -34,6 +34,7 @@ func (service *Service) GetUser() repository.Account {
 func (service *Service) CreateAccount(user *accountModel.AccountIn) *accountModel.Account {
 	value, err := service.Repo.Create(user)
 	if err != nil {
+		log.Fatal("Cannot create")
 		log.Fatal(err)
 	}
 	return value

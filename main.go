@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"ticket-booking/config"
+	container "ticket-booking/config/service_container"
 	"ticket-booking/domain/handler/api"
 	"ticket-booking/middleware"
 	"ticket-booking/repository/postgres"
@@ -22,8 +23,10 @@ func main() {
 		log.Fatal(authErr)
 	}
 
-	postgres.CreateConnection(&config.DBConfig)
+	dbConn := postgres.CreateConnection(&config.DBConfig)
 	defer postgres.DB.Conn.Close(postgres.DB.Ctx)
+
+	container.InitContainerService(dbConn)
 
 	mux := http.NewServeMux()
 
