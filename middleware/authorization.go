@@ -10,33 +10,32 @@ import (
 	"github.com/casbin/casbin/v2"
 )
 
-func Authorizer(e *casbin.Enforcer, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var role account_model.Role
-		account, err := helper.GetAccountFromToken(r)
+func Authorizer(e *casbin.Enforcer) Middleware {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var role account_model.Role
+			account, err := helper.GetAccountFromToken(r)
 
-		if err != nil {
-			role = account_model.Anonymous
-		} else {
-			role = account.Role
-		}
-		log.Printf("Enforcing: role=%s, path=%s, method=%s", role, r.URL.Path, r.Method)
+			if err != nil {
+				role = account_model.Anonymous
+			} else {
+				role = account.Role
+			}
+			log.Printf("Enforcing: role=%s, path=%s, method=%s", role, r.URL.Path, r.Method)
 
-		// Get all policies for this role
-		policies, _ := e.GetFilteredPolicy(0, string(role))
-		log.Printf("Policies for %s: %v", role, policies)
+			res, err := e.Enforce(string(role), r.URL.Path, r.Method)
 
-		res, err := e.Enforce(string(role), r.URL.Path, r.Method)
+			if err != nil {
+				log.Fatal("middleware auth: ", err)
+			}
 
-		if err != nil {
-			log.Fatal("middleware auth: ", err)
-		}
-		log.Println("res: ", res)
-		if !res {
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+			log.Println("res: ", res)
+			if !res {
+				w.WriteHeader(http.StatusForbidden)
+				return
+			}
 
-		next.ServeHTTP(w, r)
-	})
+			next.ServeHTTP(w, r)
+		})
+	}
 }

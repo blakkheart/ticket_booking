@@ -6,11 +6,10 @@ import (
 	"net/http"
 
 	"ticket-booking/domain/handler/api/helper"
-	"ticket-booking/repository"
 )
 
-func createEvent(w http.ResponseWriter, r *http.Request) {
-	var event_param repository.CreateEventParams
+func (h *handler) CreateEvent(w http.ResponseWriter, r *http.Request) {
+	var event_param struct{}
 	err := json.NewDecoder(r.Body).Decode(&event_param)
 	status := http.StatusOK
 
@@ -24,7 +23,7 @@ func createEvent(w http.ResponseWriter, r *http.Request) {
 	helper.WriteJsonResponse(w, event, status)
 }
 
-func getEvent(w http.ResponseWriter, r *http.Request) {
+func (h *handler) GetEvent(w http.ResponseWriter, r *http.Request) {
 	// id64, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
 	status := http.StatusOK
 

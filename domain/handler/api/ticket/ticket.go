@@ -6,7 +6,7 @@ import (
 	"ticket-booking/domain/handler/api/helper"
 )
 
-func createTicket(w http.ResponseWriter, r *http.Request) {
+func (h *handler) CreateTicket(w http.ResponseWriter, r *http.Request) {
 	get_model := 1
 
 	status := http.StatusOK

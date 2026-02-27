@@ -1,15 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
 
 	"ticket-booking/config"
-	container "ticket-booking/config/service_container"
-	"ticket-booking/domain/handler/api"
-	"ticket-booking/middleware"
+	"ticket-booking/internal/modules/booking"
+	"ticket-booking/internal/modules/event"
+	"ticket-booking/internal/modules/ticket"
+	"ticket-booking/internal/modules/user"
 	"ticket-booking/repository/postgres"
+	"ticket-booking/server"
 
 	"github.com/casbin/casbin/v2"
 )
@@ -23,20 +23,24 @@ func main() {
 		log.Fatal(authErr)
 	}
 
-	dbConn := postgres.CreateConnection(&config.DBConfig)
-	defer postgres.DB.Conn.Close(postgres.DB.Ctx)
+	dbPool := postgres.CreateConnection(&config.DBConfig)
+	defer dbPool.Close()
 
-	container.InitContainerService(dbConn)
+	// container.InitContainerService(dbPool)
 
-	mux := http.NewServeMux()
+	user := user.New(dbPool)
+	event := event.New(dbPool)
+	ticket := ticket.New(dbPool)
+	booking := booking.New(dbPool)
 
-	api.RegisterRoutes(mux, "/api")
+	s := server.NewServer(
+		user,
+		event,
+		ticket,
+		booking,
+	)
 
-	fmt.Println("Server started")
-
-	err := http.ListenAndServe("localhost:8080", middleware.LoggingMiddleware(middleware.Authorizer(authEnforcer, mux)))
-	if err != nil {
-		fmt.Println("Error starting the server:", err)
-	}
+	addr := "localhost:8080"
+	s.Run(addr, authEnforcer)
 
 }

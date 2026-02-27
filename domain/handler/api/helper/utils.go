@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"ticket-booking/repository"
+	accountModel "ticket-booking/models/domain/account"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -82,29 +82,29 @@ func getTokenSub(r *http.Request) (string, error) {
 
 }
 
-func parseTokenSub(jsonString string) (repository.Account, error) {
-	var acc repository.Account
+func parseTokenSub(jsonString string) (accountModel.Account, error) {
+	var acc accountModel.Account
 	err := json.Unmarshal([]byte(jsonString), &acc)
 	if err != nil {
-		return repository.Account{}, err
+		return accountModel.Account{}, err
 	}
 	return acc, nil
 }
 
-func GetAccountFromToken(r *http.Request) (repository.Account, error) {
+func GetAccountFromToken(r *http.Request) (accountModel.Account, error) {
 	sub, err := getTokenSub(r)
 	if err != nil {
-		return repository.Account{}, err
+		return accountModel.Account{}, err
 	}
 	acc, err := parseTokenSub(sub)
 	if err != nil {
-		return repository.Account{}, err
+		return accountModel.Account{}, err
 	}
 
 	return acc, nil
 }
 
-func generateSub(account *repository.Account) string {
+func generateSub(account *accountModel.Account) string {
 	jsonBytes, err := json.Marshal(account)
 	if err != nil {
 		log.Fatal("generateSub: ", err)
@@ -114,8 +114,8 @@ func generateSub(account *repository.Account) string {
 	return jsonString
 }
 
-func GenerateToken(account repository.Account) string {
-	sub := generateSub(&account)
+func GenerateToken(account *accountModel.Account) string {
+	sub := generateSub(account)
 	payload := jwt.MapClaims{
 		"sub": sub,
 		"iss": "ticket-booking",

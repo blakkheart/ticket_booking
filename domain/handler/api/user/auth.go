@@ -1,10 +1,9 @@
-package auth
+package user
 
 import (
 	"fmt"
 	"net/http"
 
-	container "ticket-booking/config/service_container"
 	"ticket-booking/domain/handler/api/helper"
 )
 
@@ -17,8 +16,8 @@ type LoginResponse struct {
 	AccessToken string `json:"access_token"`
 }
 
-func login(w http.ResponseWriter, r *http.Request) {
-	account := container.ContainerService.AccountService.GetUser()
+func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
+	account := h.service.Get(1)
 	fmt.Println(account)
 
 	token := helper.GenerateToken(account)
@@ -28,7 +27,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	helper.WriteJsonResponse(w, token, status)
 }
 
-func authorize(w http.ResponseWriter, r *http.Request) {
+func (h *handler) Authorize(w http.ResponseWriter, r *http.Request) {
 
 	helper.GetAccountFromToken(r)
 }

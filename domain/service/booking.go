@@ -1,18 +1,34 @@
 package service
 
-type Booking struct {
-	repo string
+import (
+	"context"
+
+	model "ticket-booking/models/domain/booking"
+	model_interface "ticket-booking/models/domain/interface"
+)
+
+type BookingService interface {
+	Get(id int64) *model.Booking
+	GetMany(filters any) []*model.Booking
+	Create(ctx context.Context, user *model.Booking) *model.Booking
 }
 
-func (booking *Booking) CreateBooking(ticketID int, userID int) bool {
-
-	return true
+func NewB(repo model_interface.IBookingRepository) BookingService {
+	return &bookingService{Repo: repo}
 }
 
-func (booking *Booking) FindBooking(ticketID int) bool {
+type bookingService struct {
+	Repo model_interface.IBookingRepository
+}
 
+func (service *bookingService) Get(id int64) *model.Booking {
+	return nil
+}
 
-	
-	
-	return true
+func (service *bookingService) GetMany(filters any) []*model.Booking {
+	return nil
+}
+
+func (service *bookingService) Create(ctx context.Context, user *model.Booking) *model.Booking {
+	return nil
 }
