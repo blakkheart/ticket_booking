@@ -25,7 +25,7 @@ func main() {
 		log.Fatal(authErr)
 	}
 
-	jwt := auth.NewJWTManager(config.AuthConfig.SecretKey, "test", time.Duration(1000000000000))
+	jwt := auth.NewJWTManager(config.AuthConfig.SecretKey, "test", 24*time.Hour)
 
 	dbPool := postgres.CreateConnection(&config.DBConfig)
 	defer dbPool.Close()
