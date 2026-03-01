@@ -1,9 +1,12 @@
 package auth
 
-import "ticket-booking/internal/user"
+import (
+	"context"
+	"ticket-booking/internal/user"
+)
 
 type Service interface {
-	Login(email string, password string) (string, error)
+	Login(ctx context.Context, email string, password string) (string, error)
 }
 
 func NewService(jwt *JWTManager, userService user.Service) Service {
@@ -18,7 +21,7 @@ type authService struct {
 	userServise user.Service
 }
 
-func (a *authService) Login(email string, password string) (string, error) {
+func (a *authService) Login(ctx context.Context, email string, password string) (string, error) {
 	user := a.userServise.GetByEmail(email, password)
 	a.checkPassword(password)
 	return a.generatToken(user.ID, string(user.Role))

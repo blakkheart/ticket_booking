@@ -16,7 +16,7 @@ type LoginResponse struct {
 }
 
 func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
-	account, err := h.service.Login("email", "1")
+	account, err := h.service.Login(r.Context(), "email", "1")
 	fmt.Println(account)
 
 	if err != nil {
