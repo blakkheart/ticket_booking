@@ -1,0 +1,28 @@
+POST http://127.0.0.1:8080/api/login
+
+
+###
+
+
+POST http://127.0.0.1:8080/api/register
+content-type: application/json
+
+{   
+    "email": "test@test.test",
+    "name": "sample",
+    "password": "testPassword"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/get_ticket
+content-type: application/json
+authorization: Bearer xxx
+
+{
+    "email": "test@test.test",
+    "name": "sample",
+    "password": "testPassword"
+}
+
+###
