@@ -4,26 +4,38 @@ import (
 	"log"
 	"net/http"
 
-	"ticket-booking/domain/handler/api/helper"
-	account_model "ticket-booking/models/domain/account"
+	"ticket-booking/internal/auth"
 
 	"github.com/casbin/casbin/v2"
 )
 
-func Authorizer(e *casbin.Enforcer) Middleware {
+func Authorizer(e *casbin.Enforcer, jwt *auth.JWTManager) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var role account_model.Role
-			account, err := helper.GetAccountFromToken(r)
 
-			if err != nil {
-				role = account_model.Anonymous
-			} else {
-				role = account.Role
+			if r.URL.Path == "/api/register" {
+				next.ServeHTTP(w, r)
+				return
 			}
-			log.Printf("Enforcing: role=%s, path=%s, method=%s", role, r.URL.Path, r.Method)
 
-			res, err := e.Enforce(string(role), r.URL.Path, r.Method)
+			token, error := auth.GetTokenFromPayload(r)
+			if error != nil {
+				log.Fatal("middleware auth: ", error)
+			}
+			claims, err := jwt.Parse(token)
+
+			// account, err := server.GetAccountFromToken(r)
+			// account := user.Account{Role: user.Admin}
+			// var err interface{} = nil // TODO solve that
+
+			// if err != nil {
+			// 	role = user.Anonymous
+			// } else {
+			// 	role = account.Role
+			// }
+			log.Printf("Enforcing: role=%s, path=%s, method=%s", claims.Role, r.URL.Path, r.Method)
+
+			res, err := e.Enforce(string(claims.Role), r.URL.Path, r.Method)
 
 			if err != nil {
 				log.Fatal("middleware auth: ", err)

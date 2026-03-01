@@ -21,4 +21,15 @@ func ReadConfigs() {
 	if dbErr != nil {
 		panic(fmt.Errorf("No correct DB structure was provided: %w", dbErr))
 	}
+
+	serverErr := viper.Unmarshal(&ServerConfig)
+	if serverErr != nil {
+		panic(fmt.Errorf("No correct Server structure was provided: %w", dbErr))
+	}
+
+	authErr := viper.Unmarshal(&AuthConfig)
+	if authErr != nil {
+		panic(fmt.Errorf("No correct Auth structure was provided: %w", dbErr))
+	}
+
 }

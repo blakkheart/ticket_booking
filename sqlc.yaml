@@ -26,4 +26,4 @@ sql:
               import: "github.com/google/uuid"
               type: "UUID"
           - column: "account.role"
-            go_type: "ticket-booking/models/domain/account.Role"
+            go_type: "ticket-booking/internal/user.Role"

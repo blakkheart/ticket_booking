@@ -2,14 +2,13 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"ticket-booking/config"
-	"ticket-booking/internal/modules/booking"
-	"ticket-booking/internal/modules/event"
-	"ticket-booking/internal/modules/ticket"
-	"ticket-booking/internal/modules/user"
-	"ticket-booking/repository/postgres"
-	"ticket-booking/server"
+	"ticket-booking/internal/app"
+	"ticket-booking/internal/auth"
+	"ticket-booking/internal/infrastructure/postgres"
+	"ticket-booking/internal/server"
 
 	"github.com/casbin/casbin/v2"
 )
@@ -18,29 +17,22 @@ func main() {
 
 	config.ReadConfigs()
 
-	authEnforcer, authErr := casbin.NewEnforcer("./config/casbin/auth_model.conf", "./config/casbin/policy.csv")
+	authEnforcer, authErr := casbin.NewEnforcer(
+		"./config/casbin/auth_model.conf",
+		"./config/casbin/policy.csv",
+	)
 	if authErr != nil {
 		log.Fatal(authErr)
 	}
 
+	jwt := auth.NewJWTManager(config.AuthConfig.SecretKey, "test", time.Duration(1000000000000))
+
 	dbPool := postgres.CreateConnection(&config.DBConfig)
 	defer dbPool.Close()
 
-	// container.InitContainerService(dbPool)
+	app := app.NewApp(dbPool, jwt)
+	s := server.NewServer(app)
 
-	user := user.New(dbPool)
-	event := event.New(dbPool)
-	ticket := ticket.New(dbPool)
-	booking := booking.New(dbPool)
-
-	s := server.NewServer(
-		user,
-		event,
-		ticket,
-		booking,
-	)
-
-	addr := "localhost:8080"
-	s.Run(addr, authEnforcer)
+	s.Run(config.ServerConfig.SiteHost, authEnforcer, jwt)
 
 }
