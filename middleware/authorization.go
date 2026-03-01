@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"ticket-booking/internal/auth"
+	"ticket-booking/internal/user"
 
 	"github.com/casbin/casbin/v2"
 )
@@ -18,30 +19,31 @@ func Authorizer(e *casbin.Enforcer, jwt *auth.JWTManager) Middleware {
 				return
 			}
 
+			var role string
+
 			token, error := auth.GetTokenFromPayload(r)
+
 			if error != nil {
-				log.Fatal("middleware auth: ", error)
+				log.Printf("middleware auth - failed to get token: %v", error)
+			} else {
+
+				claims, err := jwt.Parse(token)
+
+				if err != nil {
+					role = string(user.Anonymous)
+				} else {
+					role = claims.Role
+				}
 			}
-			claims, err := jwt.Parse(token)
+			log.Printf("Enforcing: role=%s, path=%s, method=%s", role, r.URL.Path, r.Method)
 
-			// account, err := server.GetAccountFromToken(r)
-			// account := user.Account{Role: user.Admin}
-			// var err interface{} = nil // TODO solve that
-
-			// if err != nil {
-			// 	role = user.Anonymous
-			// } else {
-			// 	role = account.Role
-			// }
-			log.Printf("Enforcing: role=%s, path=%s, method=%s", claims.Role, r.URL.Path, r.Method)
-
-			res, err := e.Enforce(string(claims.Role), r.URL.Path, r.Method)
+			res, err := e.Enforce(role, r.URL.Path, r.Method)
 
 			if err != nil {
-				log.Fatal("middleware auth: ", err)
+				log.Printf("middleware auth - enforce error: %v", err)
+				http.Error(w, "Authorization error", http.StatusInternalServerError)
 			}
 
-			log.Println("res: ", res)
 			if !res {
 				w.WriteHeader(http.StatusForbidden)
 				return

@@ -8,8 +8,6 @@ import (
 
 type UserHandler interface {
 	CreateAccount(w http.ResponseWriter, r *http.Request)
-	Login(w http.ResponseWriter, r *http.Request)
-	Authorize(w http.ResponseWriter, r *http.Request)
 	Routes(r *httpx.Router)
 }
 
@@ -23,6 +21,5 @@ func NewHandler(service user.Service) UserHandler {
 
 func (h *userHandler) Routes(r *httpx.Router) {
 	r.Handle(http.MethodPost, "/register", h.CreateAccount)
-	r.Handle(http.MethodPost, "/login", h.Login)
-	r.Handle(http.MethodPost, "/auth", h.Authorize)
+
 }
