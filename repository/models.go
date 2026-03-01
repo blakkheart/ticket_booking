@@ -4,8 +4,38 @@
 
 package repository
 
+import (
+	"time"
+)
+
 type Account struct {
-	ID    int32  `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Role     string `json:"role"`
+}
+
+type Booking struct {
+	ID        int64 `json:"id"`
+	AccountID int64 `json:"account_id"`
+	EventID   int64 `json:"event_id"`
+	Quantity  int32 `json:"quantity"`
+}
+
+type Event struct {
+	ID          int64      `json:"id"`
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	Date        *time.Time `json:"date"`
+	Location    string     `json:"location"`
+}
+
+type Ticket struct {
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Price       int64  `json:"price"`
+	Quantity    int32  `json:"quantity"`
+	EventID     int64  `json:"event_id"`
 }

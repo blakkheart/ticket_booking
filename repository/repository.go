@@ -1,14 +1,10 @@
 package repository
 
-import (
-	"ticket-booking/domain/model"
-)
-
 type BaseRepository struct {
 	//DB *sql.DB
 }
 
-func (repo *BaseRepository) Create(user model.User) (Account, error) {
+func (repo *BaseRepository) Create(user Account) (Account, error) {
 	q := New(DB.Conn)
 	account, err := q.CreateAccount(DB.Ctx,
 		CreateAccountParams{
@@ -29,4 +25,22 @@ func (repo *BaseRepository) Get(id int) (int, error) {
 }
 func (repo *BaseRepository) GetMany(filter any) {
 
+}
+
+func (repo *BaseRepository) CreateEvent(event_params CreateEventParams) (Event, error) {
+	q := New(DB.Conn)
+	event, err := q.CreateEvent(
+		DB.Ctx,
+		event_params,
+	)
+	return event, err
+}
+
+func (repo *BaseRepository) GetEvent(id int64) (Event, error) {
+	q := New(DB.Conn)
+	event, err := q.GetEvent(
+		DB.Ctx,
+		id,
+	)
+	return event, err
 }
