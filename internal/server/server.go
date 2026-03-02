@@ -7,12 +7,12 @@ import (
 	"ticket-booking/internal/app"
 	"ticket-booking/internal/auth"
 	"ticket-booking/internal/httpx"
+	"ticket-booking/internal/httpx/middleware"
 	authapi "ticket-booking/internal/server/auth"
 	bookingapi "ticket-booking/internal/server/booking"
 	eventapi "ticket-booking/internal/server/event"
 	ticketapi "ticket-booking/internal/server/ticket"
 	userapi "ticket-booking/internal/server/user"
-	"ticket-booking/middleware"
 
 	"github.com/casbin/casbin/v2"
 )

@@ -1,9 +1,9 @@
-package postgres
+package repository
 
 import (
 	"context"
 	eventModel "ticket-booking/internal/event"
-	sqlc_repository "ticket-booking/repository/sqlc"
+	sqlc_repository "ticket-booking/internal/db/sqlc"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

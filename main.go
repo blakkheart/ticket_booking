@@ -1,12 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
-	"ticket-booking/config"
 	"ticket-booking/internal/app"
 	"ticket-booking/internal/auth"
+	"ticket-booking/internal/config"
 	"ticket-booking/internal/infrastructure/postgres"
 	"ticket-booking/internal/server"
 
@@ -15,24 +16,32 @@ import (
 
 func main() {
 
-	config.ReadConfigs()
+	config.InitConfigs()
 
 	authEnforcer, authErr := casbin.NewEnforcer(
-		"./config/casbin/auth_model.conf",
-		"./config/casbin/policy.csv",
+		"./internal/config/casbin/auth_model.conf",
+		"./internal/config/casbin/policy.csv",
 	)
 	if authErr != nil {
 		log.Fatal(authErr)
 	}
 
-	jwt := auth.NewJWTManager(config.AuthConfig.SecretKey, "test", 24*time.Hour)
+	jwt := auth.NewJWTManager(config.AppConfigs.Auth.SecretKey, "test", 24*time.Hour)
 
-	dbPool := postgres.CreateConnection(&config.DBConfig)
+	dbPool := postgres.CreateConnection(&config.AppConfigs.DB)
 	defer dbPool.Close()
 
 	app := app.NewApp(dbPool, jwt)
 	s := server.NewServer(app)
 
-	s.Run(config.ServerConfig.SiteHost, authEnforcer, jwt)
+	s.Run(
+		fmt.Sprintf(
+			"%s:%d",
+			config.AppConfigs.Server.Host,
+			config.AppConfigs.Server.Port,
+		),
+		authEnforcer,
+		jwt,
+	)
 
 }

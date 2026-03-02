@@ -9,10 +9,10 @@ import (
 )
 
 type Service interface {
-	Get(id int64) *Account
-	GetMany(filters any) []*Account
-	Create(ctx context.Context, user *AccountIn) *Account
-	GetByEmail(email string, password string) *Account
+	Get(id int64) *User
+	GetMany(filters any) []*User
+	Create(ctx context.Context, user *CreateUserRequest) (*User, error)
+	GetByEmail(email string, password string) *User
 }
 
 func NewService(repo Repository) Service {
@@ -33,7 +33,7 @@ func (service *userService) verifyPassword(hashed string, password string) bool 
 	return err == nil
 }
 
-func (service *userService) Get(id int64) *Account {
+func (service *userService) Get(id int64) *User {
 	value, err := service.Repo.Get(id)
 	if err != nil {
 		log.Fatal("Something wrong with repo")
@@ -41,26 +41,26 @@ func (service *userService) Get(id int64) *Account {
 	return value
 }
 
-func (service *userService) GetMany(filters any) []*Account {
+func (service *userService) GetMany(filters any) []*User {
 	return nil
 }
 
-func (service *userService) GetUser() Account {
-	return Account{
+func (service *userService) GetUser() User {
+	return User{
 		ID:    1,
 		Name:  "Name",
 		Email: "Email",
 	}
 }
 
-func (service *userService) Create(ctx context.Context, user *AccountIn) *Account {
+func (service *userService) Create(ctx context.Context, user *CreateUserRequest) (*User, error) {
 	hashedPassword, err := service.hashPassword(user.Password)
 
 	if err != nil {
 		log.Fatal("Cannot hash password")
 	}
 
-	u := &AccountIn{
+	u := &CreateUserRequest{
 		Name:     user.Name,
 		Email:    user.Email,
 		Password: hashedPassword,
@@ -72,13 +72,13 @@ func (service *userService) Create(ctx context.Context, user *AccountIn) *Accoun
 		log.Fatal("Something wrong with repo")
 	}
 
-	return value
+	return value, nil
 }
 
-func (service *userService) authorization(user *Account) bool {
+func (service *userService) authorization(user *User) bool {
 	return true
 }
 
-func (s *userService) GetByEmail(email string, password string) *Account {
+func (s *userService) GetByEmail(email string, password string) *User {
 	return nil
 }

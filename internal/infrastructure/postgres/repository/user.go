@@ -1,9 +1,9 @@
-package postgres
+package repository
 
 import (
 	"context"
+	sqlc_repository "ticket-booking/internal/db/sqlc"
 	"ticket-booking/internal/user"
-	sqlc_repository "ticket-booking/repository/sqlc"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -18,7 +18,7 @@ func NewUserRepository(db *pgxpool.Pool) *accountRepository {
 	}
 }
 
-func (repo *accountRepository) Create(ctx context.Context, u *user.AccountIn) (*user.Account, error) {
+func (repo *accountRepository) Create(ctx context.Context, u *user.CreateUserRequest) (*user.User, error) {
 	account, err := repo.queries.CreateAccount(
 		ctx,
 		sqlc_repository.CreateAccountParams{
@@ -36,16 +36,16 @@ func (repo *accountRepository) Delete(id int64) error {
 	return nil
 }
 
-func (repo *accountRepository) Get(id int64) (*user.Account, error) {
+func (repo *accountRepository) Get(id int64) (*user.User, error) {
 	return nil, nil
 }
 
-func (repo *accountRepository) GetMany(filter any) ([]*user.Account, error) {
+func (repo *accountRepository) GetMany(filter any) ([]*user.User, error) {
 	return nil, nil
 }
 
-func (repo *accountRepository) fromSqlcAccount(a *sqlc_repository.Account) *user.Account {
-	account := &user.Account{
+func (repo *accountRepository) fromSqlcAccount(a *sqlc_repository.Account) *user.User {
+	account := &user.User{
 		ID:    a.ID,
 		Email: a.Email,
 		Name:  a.Name,

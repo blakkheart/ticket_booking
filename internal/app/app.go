@@ -4,7 +4,7 @@ import (
 	"ticket-booking/internal/auth"
 	"ticket-booking/internal/booking"
 	"ticket-booking/internal/event"
-	"ticket-booking/internal/infrastructure/postgres"
+	"ticket-booking/internal/infrastructure/postgres/repository"
 	"ticket-booking/internal/ticket"
 	"ticket-booking/internal/user"
 
@@ -20,16 +20,16 @@ type App struct {
 }
 
 func NewApp(pool *pgxpool.Pool, jwt *auth.JWTManager) *App {
-	userRepo := postgres.NewUserRepository(pool)
+	userRepo := repository.NewUserRepository(pool)
 	userService := user.NewService(userRepo)
 
-	eventRepo := postgres.NewEventRepository(pool)
+	eventRepo := repository.NewEventRepository(pool)
 	eventService := event.NewService(eventRepo)
 
-	ticketRepo := postgres.NewTicketRepository(pool)
+	ticketRepo := repository.NewTicketRepository(pool)
 	ticketService := ticket.NewService(ticketRepo)
 
-	bookingRepo := postgres.NewBookingRepository(pool)
+	bookingRepo := repository.NewBookingRepository(pool)
 	bookingService := booking.NewService(bookingRepo)
 
 	authService := auth.NewService(jwt, userService)

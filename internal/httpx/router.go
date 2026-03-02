@@ -15,7 +15,9 @@ func NewRouter(mux *http.ServeMux, prefix string) *Router {
 }
 
 func (r *Router) Handle(method string, path string, handler http.HandlerFunc) {
-	r.mux.HandleFunc(fmt.Sprintf("%s %s%s", method, r.prefix, path), func(w http.ResponseWriter, r *http.Request) { handler(w, r) })
+	r.mux.HandleFunc(
+		fmt.Sprintf("%s %s%s", method, r.prefix, path),
+		func(w http.ResponseWriter, r *http.Request) { handler(w, r) })
 }
 
 func (r *Router) Include(fn func(*Router)) {
