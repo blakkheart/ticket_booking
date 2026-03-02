@@ -22,7 +22,7 @@ func (h *userHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		switch err {
 		case user.ErrEmailAlreadyUsed:
 			httpx.WriteJsonResponse(w, err.Error(), http.StatusConflict)
-			return
+
 		default:
 			httpx.WriteJsonResponse(w, "internal error", http.StatusInternalServerError)
 			return

@@ -11,3 +11,5 @@ func WriteJsonResponse(w http.ResponseWriter, data any, status int) {
 
 	_ = json.NewEncoder(w).Encode(data)
 }
+
+

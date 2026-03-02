@@ -1,6 +1,7 @@
 package httpx
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
@@ -31,4 +32,19 @@ func RegisterRoutes(mux *http.ServeMux, prefix string, routes ...func(*Router)) 
 		router.Include(routes[i])
 	}
 
+}
+
+type AppHandler func(http.ResponseWriter, *http.Request) error
+
+const ErrorKey contextKey = "handler_error"
+
+func Adapt(h AppHandler) http.Handler {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			if err := h(w, r); err != nil {
+				ctx := context.WithValue(r.Context(), ErrorKey, err)
+				*r = *r.WithContext(ctx)
+			}
+		},
+	)
 }
