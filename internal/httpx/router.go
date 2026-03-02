@@ -1,7 +1,6 @@
 package httpx
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 )
@@ -41,14 +40,17 @@ type AppHandler func(http.ResponseWriter, *http.Request) error
 const ErrorKey contextKey = "handler_error"
 
 func Adapt(h AppHandler) http.Handler {
-	return http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			fmt.Println(11)
-			if err := h(w, r); err != nil {
-				ctx := context.WithValue(r.Context(), ErrorKey, err)
-				fmt.Println(ctx)
-				*r = *r.WithContext(ctx)
-			}
-		},
-	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		err := h(w, r)
+		if err == nil {
+			return
+		}
+
+		httpErr := ResolveHTTPError(err)
+
+		WriteJsonResponse(w, map[string]string{
+			"code":    httpErr.Code,
+			"message": httpErr.Message,
+		}, httpErr.Status)
+	})
 }
