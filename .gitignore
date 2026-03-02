@@ -129,4 +129,5 @@ yarn-error.log*
 
 tmp
 
+# go develop
 .air.toml

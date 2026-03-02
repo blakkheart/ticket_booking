@@ -7,7 +7,7 @@ import (
 )
 
 type UserHandler interface {
-	CreateAccount(w http.ResponseWriter, r *http.Request)
+	CreateAccount(w http.ResponseWriter, r *http.Request) error
 	Routes(r *httpx.Router)
 }
 

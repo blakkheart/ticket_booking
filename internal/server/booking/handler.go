@@ -20,5 +20,5 @@ func NewHandler(service booking.Service) Handler {
 }
 
 func (h *handler) Routes(r *httpx.Router) {
-	r.Handle(http.MethodPost, "/book", h.GetBooking)
+	// r.Handle(http.MethodPost, "/book", h.GetBooking)
 }

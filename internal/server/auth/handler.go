@@ -21,6 +21,6 @@ func NewHandler(service auth.Service) Handler {
 }
 
 func (h *handler) Routes(r *httpx.Router) {
-	r.Handle(http.MethodPost, "/login", h.Login)
-	r.Handle(http.MethodPost, "/auth", h.Authorize)
+	// r.Handle(http.MethodPost, "/login", h.Login)
+	// r.Handle(http.MethodPost, "/auth", h.Authorize)
 }

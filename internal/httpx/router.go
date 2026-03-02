@@ -15,10 +15,12 @@ func NewRouter(mux *http.ServeMux, prefix string) *Router {
 	return &Router{mux: mux, prefix: prefix}
 }
 
-func (r *Router) Handle(method string, path string, handler http.HandlerFunc) {
-	r.mux.HandleFunc(
+func (r *Router) Handle(method string, path string, handler AppHandler) {
+	r.mux.Handle(
 		fmt.Sprintf("%s %s%s", method, r.prefix, path),
-		func(w http.ResponseWriter, r *http.Request) { handler(w, r) })
+
+		Adapt(handler),
+	)
 }
 
 func (r *Router) Include(fn func(*Router)) {
@@ -41,8 +43,10 @@ const ErrorKey contextKey = "handler_error"
 func Adapt(h AppHandler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
+			fmt.Println(11)
 			if err := h(w, r); err != nil {
 				ctx := context.WithValue(r.Context(), ErrorKey, err)
+				fmt.Println(ctx)
 				*r = *r.WithContext(ctx)
 			}
 		},

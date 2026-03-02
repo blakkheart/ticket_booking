@@ -54,10 +54,10 @@ func (s *server) Run(addr string, authEnforcer *casbin.Enforcer, jwt *auth.JWTMa
 
 	handler := middleware.Chain(
 		s.router,
+		middleware.RecoveryMiddleware,
+		middleware.ErrorMiddleware,
 		middleware.RequestIDMiddleware,
 		middleware.LoggingMiddleware,
-		middleware.ErrorMiddleware,
-		middleware.RecoveryMiddleware,
 		middleware.Authorizer(authEnforcer, jwt),
 	)
 

@@ -20,5 +20,5 @@ func NewHandler(service ticket.Service) Handler {
 }
 
 func (h *handler) Routes(r *httpx.Router) {
-	r.Handle(http.MethodPost, "/ticket", h.CreateTicket)
+	// r.Handle(http.MethodPost, "/ticket", h.CreateTicket)
 }
