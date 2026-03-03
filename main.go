@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -40,11 +39,7 @@ func main() {
 	s := server.NewServer(app)
 
 	s.Run(
-		fmt.Sprintf(
-			"%s:%d",
-			config.AppConfigs.Server.Host,
-			config.AppConfigs.Server.Port,
-		),
+		config.AppConfigs.Server.GetAddress(),
 		authEnforcer,
 		jwt,
 	)
