@@ -10,6 +10,24 @@ import (
 	"github.com/casbin/casbin/v2"
 )
 
+func getRole(r *http.Request, jwt *auth.JWTManager) string {
+	role := string(user.Anonymous)
+
+	token, tokenErr := auth.GetTokenFromPayload(r)
+
+	if tokenErr != nil {
+		log.Printf("middleware auth - failed to get token: %v", tokenErr)
+	} else {
+
+		claims, err := jwt.Parse(token)
+
+		if err == nil {
+			role = claims.Role
+		}
+	}
+	return role
+}
+
 func Authorizer(e *casbin.Enforcer, jwt *auth.JWTManager) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -19,20 +37,8 @@ func Authorizer(e *casbin.Enforcer, jwt *auth.JWTManager) Middleware {
 				return
 			}
 
-			role := string(user.Anonymous)
+			role := getRole(r, jwt)
 
-			token, tokenErr := auth.GetTokenFromPayload(r)
-
-			if tokenErr != nil {
-				log.Printf("middleware auth - failed to get token: %v", tokenErr)
-			} else {
-
-				claims, err := jwt.Parse(token)
-
-				if err == nil {
-					role = claims.Role
-				}
-			}
 			log.Printf("Enforcing: role=%s, path=%s, method=%s", role, r.URL.Path, r.Method)
 
 			res, err := e.Enforce(role, r.URL.Path, r.Method)
