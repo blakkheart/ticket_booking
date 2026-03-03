@@ -128,6 +128,3 @@ yarn-error.log*
 .vscode
 
 tmp
-
-# go develop
-.air.toml
