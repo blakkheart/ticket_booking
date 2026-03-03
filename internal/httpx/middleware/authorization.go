@@ -19,19 +19,17 @@ func Authorizer(e *casbin.Enforcer, jwt *auth.JWTManager) Middleware {
 				return
 			}
 
-			var role string
+			role := string(user.Anonymous)
 
-			token, error := auth.GetTokenFromPayload(r)
+			token, tokenErr := auth.GetTokenFromPayload(r)
 
-			if error != nil {
-				log.Printf("middleware auth - failed to get token: %v", error)
+			if tokenErr != nil {
+				log.Printf("middleware auth - failed to get token: %v", tokenErr)
 			} else {
 
 				claims, err := jwt.Parse(token)
 
-				if err != nil {
-					role = string(user.Anonymous)
-				} else {
+				if err == nil {
 					role = claims.Role
 				}
 			}

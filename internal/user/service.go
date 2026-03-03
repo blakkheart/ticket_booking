@@ -80,5 +80,5 @@ func (service *userService) authorization(user *User) bool {
 }
 
 func (s *userService) GetByEmail(email string, password string) *User {
-	return nil
+	return &User{}
 }
