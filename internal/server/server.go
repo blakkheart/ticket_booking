@@ -75,6 +75,7 @@ func (s *server) Run(ctx context.Context, addr string, authEnforcer *casbin.Enfo
 			errCh <- err
 			return
 		}
+		errCh <- nil
 	}()
 
 	select {
