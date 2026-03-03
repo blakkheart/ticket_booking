@@ -5,10 +5,8 @@ import (
 	"ticket-booking/internal/httpx"
 )
 
-func (h *handler) CreateTicket(w http.ResponseWriter, r *http.Request) error {
+func (h *handler) CreateTicket(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {
 	get_model := 1
 
-	status := http.StatusOK
-
-	return httpx.JsonResponse(w, get_model, status)
+	return httpx.NewResponse(get_model, http.StatusOK), nil
 }

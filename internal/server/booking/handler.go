@@ -7,7 +7,7 @@ import (
 )
 
 type Handler interface {
-	GetBooking(w http.ResponseWriter, r *http.Request) error
+	GetBooking(w http.ResponseWriter, r *http.Request) (httpx.Response, error)
 	Routes(r *httpx.Router)
 }
 

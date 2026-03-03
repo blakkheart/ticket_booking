@@ -7,7 +7,7 @@ import (
 )
 
 type Handler interface {
-	CreateTicket(w http.ResponseWriter, r *http.Request) error
+	CreateTicket(w http.ResponseWriter, r *http.Request) (httpx.Response, error)
 	Routes(r *httpx.Router)
 }
 

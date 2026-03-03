@@ -7,8 +7,8 @@ import (
 )
 
 type Handler interface {
-	CreateEvent(w http.ResponseWriter, r *http.Request) error
-	GetEvent(w http.ResponseWriter, r *http.Request) error
+	CreateEvent(w http.ResponseWriter, r *http.Request) (httpx.Response, error)
+	GetEvent(w http.ResponseWriter, r *http.Request) (httpx.Response, error)
 	Routes(r *httpx.Router)
 }
 

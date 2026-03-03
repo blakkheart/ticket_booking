@@ -15,19 +15,19 @@ type LoginResponse struct {
 	AccessToken string `json:"access_token"`
 }
 
-func (h *handler) Login(w http.ResponseWriter, r *http.Request) error {
+func (h *handler) Login(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {
 	account, err := h.service.Login(r.Context(), "email", "1")
 	fmt.Println(account)
 
 	if err != nil {
-		return httpx.JsonResponse(w, 1, http.StatusBadRequest)
+		return httpx.NewResponse(1, http.StatusBadRequest), nil
 	}
 
-	return httpx.JsonResponse(w, 1, http.StatusOK)
+	return httpx.NewResponse(1, http.StatusOK), nil
 }
 
-func (h *handler) Authorize(w http.ResponseWriter, r *http.Request) error {
+func (h *handler) Authorize(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {
 
 	//utils.GetAccountFromToken(r)
-	return nil
+	return httpx.NewResponse(1, http.StatusOK), nil
 }

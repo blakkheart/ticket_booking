@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
+	"os"
 	"time"
 
 	"ticket-booking/internal/app"
@@ -15,6 +17,9 @@ import (
 )
 
 func main() {
+
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
 
 	config.InitConfigs()
 

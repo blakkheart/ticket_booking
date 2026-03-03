@@ -35,22 +35,25 @@ func RegisterRoutes(mux *http.ServeMux, prefix string, routes ...func(*Router)) 
 
 }
 
-type AppHandler func(http.ResponseWriter, *http.Request) error
+type AppHandler func(http.ResponseWriter, *http.Request) (Response, error)
 
 const ErrorKey contextKey = "handler_error"
 
 func Adapt(h AppHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		err := h(w, r)
-		if err == nil {
+		resp, err := h(w, r)
+		if err != nil {
+
+			httpErr := ResolveHTTPError(err)
+			WriteJsonResponse(w, map[string]string{
+				"code":    httpErr.Code,
+				"message": httpErr.Message,
+			}, httpErr.Status)
+
 			return
 		}
 
-		httpErr := ResolveHTTPError(err)
+		WriteJsonResponse(w, resp.Data(), resp.Status())
 
-		JsonResponse(w, map[string]string{
-			"code":    httpErr.Code,
-			"message": httpErr.Message,
-		}, httpErr.Status)
 	})
 }

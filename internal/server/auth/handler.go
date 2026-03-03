@@ -7,8 +7,8 @@ import (
 )
 
 type Handler interface {
-	Login(w http.ResponseWriter, r *http.Request) error
-	Authorize(w http.ResponseWriter, r *http.Request) error
+	Login(w http.ResponseWriter, r *http.Request) (httpx.Response, error)
+	Authorize(w http.ResponseWriter, r *http.Request) (httpx.Response, error)
 	Routes(r *httpx.Router)
 }
 

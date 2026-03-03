@@ -7,31 +7,24 @@ import (
 	"ticket-booking/internal/user"
 )
 
-func (h *userHandler) CreateAccount(w http.ResponseWriter, r *http.Request) error {
+func (h *userHandler) CreateAccount(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {
 	var uRequest user.CreateUserRequest
-	status := http.StatusOK
 
 	if err := json.NewDecoder(r.Body).Decode(&uRequest); err != nil {
-		return httpx.JsonResponse(w, "invalid request body", http.StatusBadRequest)
+		return nil, httpx.ErrInvalidRequestBody
 	}
 
 	u, err := h.service.Create(r.Context(), &uRequest)
 
 	if err != nil {
-		switch err {
-		case user.ErrEmailAlreadyUsed:
-			return httpx.JsonResponse(w, err.Error(), http.StatusConflict)
-
-		default:
-			return httpx.JsonResponse(w, "internal error", http.StatusInternalServerError)
-		}
+		return nil, ResolveHTTPError(err)
 	}
 
-	resp := user.UserResponse{
+	u_resp := user.UserResponse{
 		ID:    u.ID,
 		Email: u.Email,
 		Role:  string(u.Role),
 	}
 
-	return httpx.JsonResponse(w, resp, status)
+	return httpx.NewResponse(u_resp, http.StatusOK), nil
 }
