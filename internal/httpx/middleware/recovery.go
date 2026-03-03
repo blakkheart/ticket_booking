@@ -10,7 +10,7 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 		func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
 				if rec := recover(); rec != nil {
-					httpx.WriteJsonResponse(w, "internal error", http.StatusInternalServerError)
+					httpx.JsonResponse(w, "internal error", http.StatusInternalServerError)
 				}
 			}()
 			next.ServeHTTP(w, r)

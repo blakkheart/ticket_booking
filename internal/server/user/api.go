@@ -12,8 +12,7 @@ func (h *userHandler) CreateAccount(w http.ResponseWriter, r *http.Request) erro
 	status := http.StatusOK
 
 	if err := json.NewDecoder(r.Body).Decode(&uRequest); err != nil {
-		httpx.WriteJsonResponse(w, "invalid request body", http.StatusBadRequest)
-		return nil
+		return httpx.JsonResponse(w, "invalid request body", http.StatusBadRequest)
 	}
 
 	u, err := h.service.Create(r.Context(), &uRequest)
@@ -21,11 +20,10 @@ func (h *userHandler) CreateAccount(w http.ResponseWriter, r *http.Request) erro
 	if err != nil {
 		switch err {
 		case user.ErrEmailAlreadyUsed:
-			httpx.WriteJsonResponse(w, err.Error(), http.StatusConflict)
+			return httpx.JsonResponse(w, err.Error(), http.StatusConflict)
 
 		default:
-			httpx.WriteJsonResponse(w, "internal error", http.StatusInternalServerError)
-			return nil
+			return httpx.JsonResponse(w, "internal error", http.StatusInternalServerError)
 		}
 	}
 
@@ -35,6 +33,5 @@ func (h *userHandler) CreateAccount(w http.ResponseWriter, r *http.Request) erro
 		Role:  string(u.Role),
 	}
 
-	httpx.WriteJsonResponse(w, resp, status)
-	return nil
+	return httpx.JsonResponse(w, resp, status)
 }

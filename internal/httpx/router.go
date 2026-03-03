@@ -29,8 +29,8 @@ func (r *Router) Include(fn func(*Router)) {
 func RegisterRoutes(mux *http.ServeMux, prefix string, routes ...func(*Router)) {
 	router := NewRouter(mux, prefix)
 
-	for i := 0; i < len(routes); i++ {
-		router.Include(routes[i])
+	for _, r := range routes {
+		router.Include(r)
 	}
 
 }
@@ -48,7 +48,7 @@ func Adapt(h AppHandler) http.Handler {
 
 		httpErr := ResolveHTTPError(err)
 
-		WriteJsonResponse(w, map[string]string{
+		JsonResponse(w, map[string]string{
 			"code":    httpErr.Code,
 			"message": httpErr.Message,
 		}, httpErr.Status)

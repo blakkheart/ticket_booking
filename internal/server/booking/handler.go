@@ -7,7 +7,7 @@ import (
 )
 
 type Handler interface {
-	GetBooking(w http.ResponseWriter, r *http.Request)
+	GetBooking(w http.ResponseWriter, r *http.Request) error
 	Routes(r *httpx.Router)
 }
 
@@ -20,5 +20,5 @@ func NewHandler(service booking.Service) Handler {
 }
 
 func (h *handler) Routes(r *httpx.Router) {
-	// r.Handle(http.MethodPost, "/book", h.GetBooking)
+	r.Handle(http.MethodPost, "/book", h.GetBooking)
 }

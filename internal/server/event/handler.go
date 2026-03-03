@@ -7,8 +7,8 @@ import (
 )
 
 type Handler interface {
-	CreateEvent(w http.ResponseWriter, r *http.Request)
-	GetEvent(w http.ResponseWriter, r *http.Request)
+	CreateEvent(w http.ResponseWriter, r *http.Request) error
+	GetEvent(w http.ResponseWriter, r *http.Request) error
 	Routes(r *httpx.Router)
 }
 
@@ -21,6 +21,6 @@ func NewHandler(service event.Service) Handler {
 }
 
 func (h *handler) Routes(r *httpx.Router) {
-	// r.Handle(http.MethodPost, "/event", h.CreateEvent)
-	// r.Handle(http.MethodPost, "/event/{id}", h.GetEvent)
+	r.Handle(http.MethodPost, "/event", h.CreateEvent)
+	r.Handle(http.MethodPost, "/event/{id}", h.GetEvent)
 }

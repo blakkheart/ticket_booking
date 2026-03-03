@@ -5,7 +5,7 @@ import (
 	"ticket-booking/internal/httpx"
 )
 
-func (h *handler) GetBooking(w http.ResponseWriter, r *http.Request) {
+func (h *handler) GetBooking(w http.ResponseWriter, r *http.Request) error {
 	//id64, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
 	// user := config.ContainerService.Service.GetUser()
 	// event := config.ContainerService.Service.GetEvent(32)
@@ -15,5 +15,5 @@ func (h *handler) GetBooking(w http.ResponseWriter, r *http.Request) {
 
 	status := http.StatusOK
 
-	httpx.WriteJsonResponse(w, get_model, status)
+	return httpx.JsonResponse(w, get_model, status)
 }
