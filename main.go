@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"log"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"ticket-booking/internal/app"
@@ -35,13 +38,24 @@ func main() {
 	dbPool := postgres.CreateConnection(&config.AppConfigs.DB)
 	defer dbPool.Close()
 
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
+	defer stop()
+
 	app := app.NewApp(dbPool, jwt)
 	s := server.NewServer(app)
 
-	s.Run(
+	if err := s.Run(
+		ctx,
 		config.AppConfigs.Server.GetAddress(),
 		authEnforcer,
 		jwt,
-	)
+	); err != nil {
+		log.Fatal("Server failed: %v", err)
+	}
 
+	slog.Info("Application stopped")
 }

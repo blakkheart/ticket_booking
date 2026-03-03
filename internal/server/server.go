@@ -1,8 +1,10 @@
 package server
 
 import (
-	"fmt"
+	"context"
+	"log/slog"
 	"net/http"
+	"time"
 
 	"ticket-booking/internal/app"
 	"ticket-booking/internal/auth"
@@ -18,7 +20,7 @@ import (
 )
 
 type Server interface {
-	Run(addr string, authEnforcer *casbin.Enforcer, jwt *auth.JWTManager)
+	Run(ctx context.Context, addr string, authEnforcer *casbin.Enforcer, jwt *auth.JWTManager) error
 }
 
 type server struct {
@@ -50,7 +52,7 @@ func NewServer(a *app.App) Server {
 	}
 }
 
-func (s *server) Run(addr string, authEnforcer *casbin.Enforcer, jwt *auth.JWTManager) {
+func (s *server) Run(ctx context.Context, addr string, authEnforcer *casbin.Enforcer, jwt *auth.JWTManager) error {
 
 	handler := middleware.Chain(
 		s.router,
@@ -60,10 +62,36 @@ func (s *server) Run(addr string, authEnforcer *casbin.Enforcer, jwt *auth.JWTMa
 		middleware.Authorizer(authEnforcer, jwt),
 	)
 
-	fmt.Println("Server started")
-
-	err := http.ListenAndServe(addr, handler)
-	if err != nil {
-		fmt.Println("Error starting the server:", err)
+	server := &http.Server{
+		Addr:    addr,
+		Handler: handler,
 	}
+
+	errCh := make(chan error, 1)
+
+	go func() {
+		slog.Info("Server started", "addr", addr)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			errCh <- err
+			return
+		}
+	}()
+
+	select {
+	case <-ctx.Done():
+		slog.Info("Shutdown signal received")
+
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			return err
+		}
+
+		return nil
+
+	case err := <-errCh:
+		return err
+	}
+
 }
