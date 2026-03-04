@@ -1,9 +1,9 @@
 
 migrate-up:
-	goose -dir="repository/migrations" postgres postgresql://wowsp:wowsp@localhost:5432/booking up
+	goose -dir="internal/db/migrations" postgres postgresql://wowsp:wowsp@localhost:5432/booking up
 
 migrate-down:
-	goose -dir="repository/migrations" postgres postgresql://wowsp:wowsp@localhost:5432/booking down
+	goose -dir="internal/db/migrations" postgres postgresql://wowsp:wowsp@localhost:5432/booking down
 
 generate-sql:
 	sqlc generate

@@ -3,7 +3,7 @@
 CREATE TABLE account (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(128) NOT NULL,
     role VARCHAR(128) NOT NULL
 );

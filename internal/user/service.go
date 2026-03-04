@@ -4,24 +4,26 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
-	Get(id int64) *User
+	Get(id int64) (*User, error)
 	GetMany(filters any) []*User
 	Create(ctx context.Context, user *CreateUserRequest) (*User, error)
-	GetByEmail(email string) *User
-	GetUserAuthByEmail(email string) *UserAuth
+	GetByEmail(email string) (*User, error)
+	GetUserAuthByEmail(email string) (*UserAuth, error)
 }
 
-func NewService(repo Repository) Service {
-	return &userService{Repo: repo}
+func NewService(repo Repository, logger *slog.Logger) Service {
+	return &userService{Repo: repo, logger: logger}
 }
 
 type userService struct {
-	Repo Repository
+	Repo   Repository
+	logger *slog.Logger
 }
 
 func (service *userService) hashPassword(password string) (string, error) {
@@ -34,12 +36,12 @@ func (service *userService) verifyPassword(hashed string, password string) bool 
 	return err == nil
 }
 
-func (service *userService) Get(id int64) *User {
+func (service *userService) Get(id int64) (*User, error) {
 	value, err := service.Repo.Get(id)
 	if err != nil {
 		log.Fatal("Something wrong with repo")
 	}
-	return value
+	return value, nil
 }
 
 func (service *userService) GetMany(filters any) []*User {
@@ -58,7 +60,7 @@ func (service *userService) Create(ctx context.Context, user *CreateUserRequest)
 	hashedPassword, err := service.hashPassword(user.Password)
 
 	if err != nil {
-		log.Fatal("Cannot hash password")
+		return nil, err
 	}
 
 	u := &CreateUserRequest{
@@ -68,9 +70,10 @@ func (service *userService) Create(ctx context.Context, user *CreateUserRequest)
 	}
 
 	value, err := service.Repo.Create(ctx, u)
+
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
-		log.Fatal("Something wrong with repo")
+		return nil, err
 	}
 
 	return value, nil
@@ -80,10 +83,10 @@ func (service *userService) authorization(user *User) bool {
 	return true
 }
 
-func (s *userService) GetByEmail(email string) *User {
-	return &User{}
+func (s *userService) GetByEmail(email string) (*User, error) {
+	return &User{}, nil
 }
 
-func (s *userService) GetUserAuthByEmail(email string) *UserAuth {
-	return &UserAuth{}
+func (s *userService) GetUserAuthByEmail(email string) (*UserAuth, error) {
+	return &UserAuth{}, nil
 }

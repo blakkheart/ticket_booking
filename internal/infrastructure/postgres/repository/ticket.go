@@ -2,21 +2,22 @@ package repository
 
 import (
 	"context"
-	"ticket-booking/internal/ticket"
+	"log/slog"
 	sqlc_repository "ticket-booking/internal/db/sqlc"
+	"ticket-booking/internal/ticket"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ticketRepository struct {
-	DB      *pgxpool.Pool
 	queries *sqlc_repository.Queries
+	logger  *slog.Logger
 }
 
-func NewTicketRepository(db *pgxpool.Pool) *ticketRepository {
+func NewTicketRepository(db *pgxpool.Pool, logger *slog.Logger) *ticketRepository {
 	return &ticketRepository{
-		DB:      db,
 		queries: sqlc_repository.New(db),
+		logger:  logger,
 	}
 }
 

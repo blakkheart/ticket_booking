@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"log/slog"
 	"ticket-booking/internal/user"
 )
 
@@ -9,20 +10,22 @@ type Service interface {
 	Login(ctx context.Context, email string, password string) (string, error)
 }
 
-func NewService(jwt *JWTManager, userService user.Service) Service {
+func NewService(jwt *JWTManager, userService user.Service, logger *slog.Logger) Service {
 	return &authService{
 		jwt:         jwt,
 		userServise: userService,
+		logger:      logger,
 	}
 }
 
 type authService struct {
 	jwt         *JWTManager
 	userServise user.Service
+	logger      *slog.Logger
 }
 
 func (a *authService) Login(ctx context.Context, email string, password string) (string, error) {
-	user := a.userServise.GetUserAuthByEmail(email)
+	user, _ := a.userServise.GetUserAuthByEmail(email)
 	a.checkPassword(password, "1")
 	return a.generateToken(user.ID, string(user.Role))
 }

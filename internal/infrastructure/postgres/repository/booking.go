@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"log/slog"
 	"ticket-booking/internal/booking"
 	sqlc_repository "ticket-booking/internal/db/sqlc"
 
@@ -10,11 +11,13 @@ import (
 
 type bookingRepository struct {
 	queries *sqlc_repository.Queries
+	logger  *slog.Logger
 }
 
-func NewBookingRepository(db *pgxpool.Pool) *bookingRepository {
+func NewBookingRepository(db *pgxpool.Pool, logger *slog.Logger) *bookingRepository {
 	return &bookingRepository{
 		queries: sqlc_repository.New(db),
+		logger:  logger,
 	}
 }
 

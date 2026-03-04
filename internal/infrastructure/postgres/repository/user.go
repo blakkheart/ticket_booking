@@ -2,19 +2,24 @@ package repository
 
 import (
 	"context"
+	"errors"
+	"log/slog"
 	sqlc_repository "ticket-booking/internal/db/sqlc"
 	"ticket-booking/internal/user"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type accountRepository struct {
 	queries *sqlc_repository.Queries
+	logger  *slog.Logger
 }
 
-func NewUserRepository(db *pgxpool.Pool) *accountRepository {
+func NewUserRepository(db *pgxpool.Pool, logger *slog.Logger) *accountRepository {
 	return &accountRepository{
 		queries: sqlc_repository.New(db),
+		logger:  logger,
 	}
 }
 
@@ -28,6 +33,15 @@ func (repo *accountRepository) Create(ctx context.Context, u *user.CreateUserReq
 			Role:     user.Member,
 		},
 	)
+
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" && pgErr.ConstraintName == "account_email_key" {
+				return nil, user.ErrEmailAlreadyUsed
+			}
+		}
+	}
 
 	return repo.fromSqlcAccount(&account), err
 }

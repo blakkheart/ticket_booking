@@ -2,19 +2,22 @@ package repository
 
 import (
 	"context"
-	eventModel "ticket-booking/internal/event"
+	"log/slog"
 	sqlc_repository "ticket-booking/internal/db/sqlc"
+	eventModel "ticket-booking/internal/event"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type eventRepository struct {
 	queries *sqlc_repository.Queries
+	logger  *slog.Logger
 }
 
-func NewEventRepository(db *pgxpool.Pool) *eventRepository {
+func NewEventRepository(db *pgxpool.Pool, logger *slog.Logger) *eventRepository {
 	return &eventRepository{
 		queries: sqlc_repository.New(db),
+		logger:  logger,
 	}
 }
 

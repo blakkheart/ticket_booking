@@ -2,7 +2,7 @@ package booking
 
 import (
 	"context"
-
+	"log/slog"
 )
 
 type Service interface {
@@ -11,12 +11,13 @@ type Service interface {
 	Create(ctx context.Context, user *Booking) *Booking
 }
 
-func NewService(repo Repository) Service {
-	return &bookingService{Repo: repo}
+func NewService(repo Repository, logger *slog.Logger) Service {
+	return &bookingService{Repo: repo, logger: logger}
 }
 
 type bookingService struct {
-	Repo Repository
+	Repo   Repository
+	logger *slog.Logger
 }
 
 func (service *bookingService) Get(id int64) *Booking {

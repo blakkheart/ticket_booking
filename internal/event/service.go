@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	"log"
+	"log/slog"
 )
 
 type Service interface {
@@ -11,12 +12,13 @@ type Service interface {
 	Create(ctx context.Context, user *Event) *Event
 }
 
-func NewService(repo Repository) Service {
-	return &eventService{Repo: repo}
+func NewService(repo Repository, logger *slog.Logger) Service {
+	return &eventService{Repo: repo, logger: logger}
 }
 
 type eventService struct {
-	Repo Repository
+	Repo   Repository
+	logger *slog.Logger
 }
 
 func (service *eventService) Get(id int64) *Event {

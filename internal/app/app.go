@@ -21,19 +21,19 @@ type App struct {
 }
 
 func NewApp(pool *pgxpool.Pool, jwt *auth.JWTManager, logger *slog.Logger) *App {
-	userRepo := repository.NewUserRepository(pool)
-	userService := user.NewService(userRepo)
+	userRepo := repository.NewUserRepository(pool, logger)
+	userService := user.NewService(userRepo, logger)
 
-	eventRepo := repository.NewEventRepository(pool)
-	eventService := event.NewService(eventRepo)
+	eventRepo := repository.NewEventRepository(pool, logger)
+	eventService := event.NewService(eventRepo, logger)
 
-	ticketRepo := repository.NewTicketRepository(pool)
-	ticketService := ticket.NewService(ticketRepo)
+	ticketRepo := repository.NewTicketRepository(pool, logger)
+	ticketService := ticket.NewService(ticketRepo, logger)
 
-	bookingRepo := repository.NewBookingRepository(pool)
-	bookingService := booking.NewService(bookingRepo)
+	bookingRepo := repository.NewBookingRepository(pool, logger)
+	bookingService := booking.NewService(bookingRepo, logger)
 
-	authService := auth.NewService(jwt, userService)
+	authService := auth.NewService(jwt, userService, logger)
 
 	return &App{
 		User:    userService,

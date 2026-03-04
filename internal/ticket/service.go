@@ -2,6 +2,7 @@ package ticket
 
 import (
 	"context"
+	"log/slog"
 )
 
 type Service interface {
@@ -10,12 +11,13 @@ type Service interface {
 	Create(ctx context.Context, user *Ticket) *Ticket
 }
 
-func NewService(repo Repository) Service {
-	return &ticketService{Repo: repo}
+func NewService(repo Repository, logger *slog.Logger) Service {
+	return &ticketService{Repo: repo, logger: logger}
 }
 
 type ticketService struct {
-	Repo Repository
+	Repo   Repository
+	logger *slog.Logger
 }
 
 func (service *ticketService) Get(id int64) *Ticket {
