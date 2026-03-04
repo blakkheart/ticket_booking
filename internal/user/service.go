@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"golang.org/x/crypto/bcrypt"
@@ -53,26 +54,25 @@ func (service *userService) GetUser() User {
 }
 
 func (service *userService) Create(ctx context.Context, user *CreateUserRequest) (*User, error) {
-	// hashedPassword, err := service.hashPassword(user.Password)
+	hashedPassword, err := service.hashPassword(user.Password)
 
-	// if err != nil {
-	// 	log.Fatal("Cannot hash password")
-	// }
+	if err != nil {
+		log.Fatal("Cannot hash password")
+	}
 
-	// u := &CreateUserRequest{
-	// 	Name:     user.Name,
-	// 	Email:    user.Email,
-	// 	Password: hashedPassword,
-	// }
+	u := &CreateUserRequest{
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: hashedPassword,
+	}
 
-	// value, err := service.Repo.Create(ctx, u)
-	// if err != nil {
-	// 	fmt.Printf("err: %v\n", err)
-	// 	log.Fatal("Something wrong with repo")
-	// }
+	value, err := service.Repo.Create(ctx, u)
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+		log.Fatal("Something wrong with repo")
+	}
 
-	// return value, nil
-	return nil, ErrEmailAlreadyUsed
+	return value, nil
 }
 
 func (service *userService) authorization(user *User) bool {

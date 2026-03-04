@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"ticket-booking/internal/config"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -14,7 +15,8 @@ func CreateConnection(dbConf *config.DBConfig) *pgxpool.Pool {
 		"password=%s dbname=%s sslmode=disable",
 		dbConf.Host, dbConf.Port, dbConf.User, dbConf.Password, dbConf.Name)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	conf, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
