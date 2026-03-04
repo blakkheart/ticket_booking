@@ -69,14 +69,14 @@ func (s *server) Run(ctx context.Context, addr string, authEnforcer *casbin.Enfo
 
 	errCh := make(chan error, 1)
 
-	go func() {
+	go func(errCh chan<- error) {
 		slog.Info("Server started", "addr", addr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			errCh <- err
 			return
 		}
 		errCh <- nil
-	}()
+	}(errCh)
 
 	select {
 	case <-ctx.Done():

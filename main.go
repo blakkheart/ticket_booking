@@ -54,7 +54,7 @@ func main() {
 		authEnforcer,
 		jwt,
 	); err != nil {
-		log.Fatal("Server failed: %v", err)
+		log.Fatalf("Server failed: %v", err)
 	}
 
 	slog.Info("Application stopped")
