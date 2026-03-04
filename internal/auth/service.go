@@ -22,15 +22,15 @@ type authService struct {
 }
 
 func (a *authService) Login(ctx context.Context, email string, password string) (string, error) {
-	user := a.userServise.GetByEmail(email, password)
-	a.checkPassword(password)
-	return a.generatToken(user.ID, string(user.Role))
+	user := a.userServise.GetByEmail(email)
+	a.checkPassword(password, "1")
+	return a.generateToken(user.ID, string(user.Role))
 }
 
-func (a *authService) checkPassword(password string) bool {
+func (a *authService) checkPassword(password string, hashedPassword string) bool {
 	return true
 }
 
-func (a *authService) generatToken(userID int64, role string) (string, error) {
+func (a *authService) generateToken(userID int64, role string) (string, error) {
 	return a.jwt.Generate(userID, role)
 }
