@@ -1,6 +1,7 @@
 package app
 
 import (
+	"log/slog"
 	"ticket-booking/internal/auth"
 	"ticket-booking/internal/booking"
 	"ticket-booking/internal/event"
@@ -19,7 +20,7 @@ type App struct {
 	Auth    auth.Service
 }
 
-func NewApp(pool *pgxpool.Pool, jwt *auth.JWTManager) *App {
+func NewApp(pool *pgxpool.Pool, jwt *auth.JWTManager, logger *slog.Logger) *App {
 	userRepo := repository.NewUserRepository(pool)
 	userService := user.NewService(userRepo)
 

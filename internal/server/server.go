@@ -20,14 +20,20 @@ import (
 )
 
 type Server interface {
-	Run(ctx context.Context, addr string, authEnforcer *casbin.Enforcer, jwt *auth.JWTManager) error
+	Run(
+		ctx context.Context,
+		addr string,
+		authEnforcer *casbin.Enforcer,
+		jwt *auth.JWTManager,
+	) error
 }
 
 type server struct {
 	router *http.ServeMux
+	logger *slog.Logger
 }
 
-func NewServer(a *app.App) Server {
+func NewServer(a *app.App, logger *slog.Logger) Server {
 	mux := http.NewServeMux()
 
 	userHandler := userapi.NewHandler(a.User)
@@ -49,10 +55,16 @@ func NewServer(a *app.App) Server {
 
 	return &server{
 		router: mux,
+		logger: logger,
 	}
 }
 
-func (s *server) Run(ctx context.Context, addr string, authEnforcer *casbin.Enforcer, jwt *auth.JWTManager) error {
+func (s *server) Run(
+	ctx context.Context,
+	addr string,
+	authEnforcer *casbin.Enforcer,
+	jwt *auth.JWTManager,
+) error {
 
 	handler := middleware.Chain(
 		s.router,
@@ -70,7 +82,7 @@ func (s *server) Run(ctx context.Context, addr string, authEnforcer *casbin.Enfo
 	errCh := make(chan error, 1)
 
 	go func(errCh chan<- error) {
-		slog.Info("Server started", "addr", addr)
+		s.logger.Info("Server started", "addr", addr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			errCh <- err
 			return
@@ -80,7 +92,7 @@ func (s *server) Run(ctx context.Context, addr string, authEnforcer *casbin.Enfo
 
 	select {
 	case <-ctx.Done():
-		slog.Info("Shutdown signal received")
+		s.logger.Info("Shutdown signal received")
 
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()

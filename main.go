@@ -20,7 +20,12 @@ import (
 
 func main() {
 
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	opts := &slog.HandlerOptions{
+		Level:     slog.LevelDebug,
+		AddSource: true,
+	}
+	handler := slog.NewTextHandler(os.Stdout, opts)
+	logger := slog.New(handler)
 	slog.SetDefault(logger)
 
 	config.InitConfigs()
@@ -45,8 +50,8 @@ func main() {
 	)
 	defer stop()
 
-	app := app.NewApp(dbPool, jwt)
-	s := server.NewServer(app)
+	app := app.NewApp(dbPool, jwt, logger)
+	s := server.NewServer(app, logger)
 
 	if err := s.Run(
 		ctx,
@@ -54,7 +59,7 @@ func main() {
 		authEnforcer,
 		jwt,
 	); err != nil {
-		log.Fatalf("Server failed: %v", err)
+		logger.Error("Server failed", "error", err)
 	}
 
 	slog.Info("Application stopped")
