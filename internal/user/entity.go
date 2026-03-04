@@ -14,3 +14,10 @@ type User struct {
 	Name  string
 	Role  Role
 }
+
+type UserAuth struct {
+	ID           int64
+	Email        string
+	PasswordHash string
+	Role         Role
+}

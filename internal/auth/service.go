@@ -22,7 +22,7 @@ type authService struct {
 }
 
 func (a *authService) Login(ctx context.Context, email string, password string) (string, error) {
-	user := a.userServise.GetByEmail(email)
+	user := a.userServise.GetUserAuthByEmail(email)
 	a.checkPassword(password, "1")
 	return a.generateToken(user.ID, string(user.Role))
 }

@@ -13,6 +13,7 @@ type Service interface {
 	GetMany(filters any) []*User
 	Create(ctx context.Context, user *CreateUserRequest) (*User, error)
 	GetByEmail(email string) *User
+	GetUserAuthByEmail(email string) *UserAuth
 }
 
 func NewService(repo Repository) Service {
@@ -81,4 +82,8 @@ func (service *userService) authorization(user *User) bool {
 
 func (s *userService) GetByEmail(email string) *User {
 	return &User{}
+}
+
+func (s *userService) GetUserAuthByEmail(email string) *UserAuth {
+	return &UserAuth{}
 }

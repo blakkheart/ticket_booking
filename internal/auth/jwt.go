@@ -9,6 +9,16 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+
+// refresh_tokens:
+// - id
+// - user_id
+// - token_hash
+// - expires_at
+// - revoked
+// - created_at
+
+
 func GetTokenFromPayload(r *http.Request) (string, error) {
 	reqToken := r.Header.Get("Authorization")
 	splitToken := strings.Split(reqToken, "Bearer")
