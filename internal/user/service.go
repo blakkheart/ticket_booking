@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
 
 	"golang.org/x/crypto/bcrypt"
@@ -13,8 +12,7 @@ type Service interface {
 	Get(id int64) (*User, error)
 	GetMany(filters any) []*User
 	Create(ctx context.Context, user *CreateUserRequest) (*User, error)
-	GetByEmail(email string) (*User, error)
-	GetUserAuthByEmail(email string) (*UserAuth, error)
+	GetUserAuthByEmail(ctx context.Context, email string) (*UserAuth, error)
 }
 
 func NewService(repo Repository, logger *slog.Logger) Service {
@@ -26,29 +24,24 @@ type userService struct {
 	logger *slog.Logger
 }
 
-func (service *userService) hashPassword(password string) (string, error) {
+func (s *userService) hashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
 }
 
-func (service *userService) verifyPassword(hashed string, password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
-	return err == nil
-}
-
-func (service *userService) Get(id int64) (*User, error) {
-	value, err := service.Repo.Get(id)
+func (s *userService) Get(id int64) (*User, error) {
+	value, err := s.Repo.Get(id)
 	if err != nil {
-		log.Fatal("Something wrong with repo")
+		return nil, err
 	}
 	return value, nil
 }
 
-func (service *userService) GetMany(filters any) []*User {
+func (s *userService) GetMany(filters any) []*User {
 	return nil
 }
 
-func (service *userService) GetUser() User {
+func (s *userService) GetUser() User {
 	return User{
 		ID:    1,
 		Name:  "Name",
@@ -56,8 +49,8 @@ func (service *userService) GetUser() User {
 	}
 }
 
-func (service *userService) Create(ctx context.Context, user *CreateUserRequest) (*User, error) {
-	hashedPassword, err := service.hashPassword(user.Password)
+func (s *userService) Create(ctx context.Context, user *CreateUserRequest) (*User, error) {
+	hashedPassword, err := s.hashPassword(user.Password)
 
 	if err != nil {
 		return nil, err
@@ -69,7 +62,7 @@ func (service *userService) Create(ctx context.Context, user *CreateUserRequest)
 		Password: hashedPassword,
 	}
 
-	value, err := service.Repo.Create(ctx, u)
+	value, err := s.Repo.Create(ctx, u)
 
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
@@ -79,14 +72,12 @@ func (service *userService) Create(ctx context.Context, user *CreateUserRequest)
 	return value, nil
 }
 
-func (service *userService) authorization(user *User) bool {
-	return true
-}
+func (s *userService) GetUserAuthByEmail(ctx context.Context, email string) (*UserAuth, error) {
+	value, err := s.Repo.GetByEmail(ctx, email)
 
-func (s *userService) GetByEmail(email string) (*User, error) {
-	return &User{}, nil
-}
+	if err != nil {
+		return nil, err
+	}
 
-func (s *userService) GetUserAuthByEmail(email string) (*UserAuth, error) {
-	return &UserAuth{}, nil
+	return value, nil
 }

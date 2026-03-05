@@ -9,3 +9,7 @@ RETURNING *;
 -- name: GetAccount :one
 SELECT * FROM account
 WHERE id = $1;
+
+-- name: GetAccountByEmail :one
+SELECT * FROM account
+WHERE email = $1;

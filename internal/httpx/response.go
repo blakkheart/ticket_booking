@@ -8,10 +8,11 @@ import (
 type Response interface {
 	Data() any
 	Status() int
+	WriteJson(w http.ResponseWriter) error
 }
 
 func (r *response) Data() any {
-	return r.Data
+	return r.data
 }
 
 func (r *response) Status() int {
@@ -30,9 +31,9 @@ func NewResponse(data any, status int) Response {
 	}
 }
 
-func WriteJsonResponse(w http.ResponseWriter, data any, status int) error {
+func (r *response) WriteJson(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
+	w.WriteHeader(r.status)
 
-	return json.NewEncoder(w).Encode(data)
+	return json.NewEncoder(w).Encode(r.data)
 }

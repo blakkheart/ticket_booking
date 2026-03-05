@@ -2,6 +2,7 @@ package httpx
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 )
 
@@ -54,6 +55,7 @@ func ResolveHTTPError(err error) *HTTPError {
 		}
 	}
 
+	slog.Error("Error occured in application", "error", err)
 	return &HTTPError{
 		Status:  http.StatusInternalServerError,
 		Code:    "INTERNAL_ERROR",

@@ -3,3 +3,4 @@ p, anonymous, /api/login, *
 p, anonymous, /api/register, *
 p, member, /api/logout, *
 p, member, /member/*, *
+p, member, /api/ticket*, *

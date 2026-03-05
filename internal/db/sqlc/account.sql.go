@@ -60,6 +60,24 @@ func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
 	return i, err
 }
 
+const getAccountByEmail = `-- name: GetAccountByEmail :one
+SELECT id, name, email, password, role FROM account
+WHERE email = $1
+`
+
+func (q *Queries) GetAccountByEmail(ctx context.Context, email string) (Account, error) {
+	row := q.db.QueryRow(ctx, getAccountByEmail, email)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
+		&i.Role,
+	)
+	return i, err
+}
+
 const getAllAccounts = `-- name: GetAllAccounts :many
 SELECT id, name, email, password, role FROM account
 `

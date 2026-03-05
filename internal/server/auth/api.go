@@ -1,7 +1,7 @@
 package authapi
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"ticket-booking/internal/httpx"
 )
@@ -12,18 +12,23 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	AccessToken string `json:"access_token"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 func (h *handler) Login(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {
-	account, err := h.service.Login(r.Context(), "email", "1")
-	fmt.Println(account)
-
-	if err != nil {
-		return httpx.NewResponse(1, http.StatusBadRequest), nil
+	var logReq LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&logReq); err != nil {
+		return nil, httpx.ErrInvalidRequestBody
 	}
 
-	return httpx.NewResponse(1, http.StatusOK), nil
+	account, err := h.service.Login(r.Context(), logReq.Email, logReq.Password)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return httpx.NewResponse(account, http.StatusOK), nil
 }
 
 func (h *handler) Authorize(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {

@@ -2,8 +2,11 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"ticket-booking/internal/user"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
@@ -24,16 +27,25 @@ type authService struct {
 	logger      *slog.Logger
 }
 
-func (a *authService) Login(ctx context.Context, email string, password string) (string, error) {
-	user, _ := a.userServise.GetUserAuthByEmail(email)
-	a.checkPassword(password, "1")
-	return a.generateToken(user.ID, string(user.Role))
+func (s *authService) Login(ctx context.Context, email string, password string) (string, error) {
+	user, err := s.userServise.GetUserAuthByEmail(ctx, email)
+	if err != nil {
+		return "", err
+	}
+	s.logger.Debug("passwords", "hashed", user.PasswordHash, "getted", password)
+	ok := s.verifyPassword(user.PasswordHash, password)
+	if !ok {
+		return "", errors.New("Wrong password")
+	}
+
+	return s.generateToken(user.ID, string(user.Role))
 }
 
-func (a *authService) checkPassword(password string, hashedPassword string) bool {
-	return true
+func (s *authService) generateToken(userID int64, role string) (string, error) {
+	return s.jwt.Generate(userID, role)
 }
 
-func (a *authService) generateToken(userID int64, role string) (string, error) {
-	return a.jwt.Generate(userID, role)
+func (s *authService) verifyPassword(hashed string, password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
+	return err == nil
 }

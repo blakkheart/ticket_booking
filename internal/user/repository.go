@@ -7,4 +7,5 @@ type Repository interface {
 	Delete(id int64) error
 	Get(id int64) (*User, error)
 	GetMany(filter any) ([]*User, error)
+	GetByEmail(ctx context.Context, email string) (*UserAuth, error)
 }

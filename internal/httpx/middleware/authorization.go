@@ -2,9 +2,11 @@ package middleware
 
 import (
 	"log"
+	"log/slog"
 	"net/http"
 
 	"ticket-booking/internal/auth"
+	"ticket-booking/internal/httpx"
 	"ticket-booking/internal/user"
 
 	"github.com/casbin/casbin/v2"
@@ -16,7 +18,7 @@ func getRole(r *http.Request, jwt *auth.JWTManager) string {
 	token, tokenErr := auth.GetTokenFromPayload(r)
 
 	if tokenErr != nil {
-		log.Printf("middleware auth - failed to get token: %v", tokenErr)
+		slog.Info("middleware auth - failed to get token", "tokenErr", tokenErr)
 	} else {
 
 		claims, err := jwt.Parse(token)
@@ -36,10 +38,14 @@ func Authorizer(e *casbin.Enforcer, jwt *auth.JWTManager) Middleware {
 				next.ServeHTTP(w, r)
 				return
 			}
+			reqID, ok := httpx.GetRequestID(r.Context())
+			if !ok {
+				reqID = "UNKNOWN"
+			}
 
 			role := getRole(r, jwt)
 
-			log.Printf("Enforcing: role=%s, path=%s, method=%s", role, r.URL.Path, r.Method)
+			slog.Debug("Enforcing auth", "requestID", reqID, "role", role, "path", r.URL.Path, "method", r.Method)
 
 			res, err := e.Enforce(role, r.URL.Path, r.Method)
 
@@ -47,6 +53,7 @@ func Authorizer(e *casbin.Enforcer, jwt *auth.JWTManager) Middleware {
 				log.Printf("middleware auth - enforce error: %v", err)
 				http.Error(w, "Authorization error", http.StatusInternalServerError)
 			}
+			slog.Debug("Enforced resolution", "resolution", res)
 
 			if !res {
 				w.WriteHeader(http.StatusForbidden)

@@ -58,6 +58,23 @@ func (repo *accountRepository) GetMany(filter any) ([]*user.User, error) {
 	return nil, nil
 }
 
+func (repo *accountRepository) GetByEmail(ctx context.Context, email string) (*user.UserAuth, error) {
+	acc, err := repo.queries.GetAccountByEmail(ctx, email)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			return nil, err
+		}
+	}
+	return &user.UserAuth{
+		ID:           acc.ID,
+		Email:        acc.Email,
+		PasswordHash: acc.Password,
+		Role:         acc.Role,
+	}, nil
+
+}
+
 func (repo *accountRepository) fromSqlcAccount(a *sqlc_repository.Account) *user.User {
 	account := &user.User{
 		ID:    a.ID,

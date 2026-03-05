@@ -19,7 +19,8 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 
 					// TODO sentry
 
-					httpx.WriteJsonResponse(w, "Something went wrong. Please try again later", http.StatusInternalServerError)
+					errResp := httpx.NewResponse("Something went wrong. Please try again later", http.StatusInternalServerError)
+					errResp.WriteJson(w)
 				}
 			}()
 

@@ -45,15 +45,16 @@ func Adapt(h AppHandler) http.Handler {
 		if err != nil {
 
 			httpErr := ResolveHTTPError(err)
-			WriteJsonResponse(w, map[string]string{
+			errResp := NewResponse(map[string]string{
 				"code":    httpErr.Code,
 				"message": httpErr.Message,
 			}, httpErr.Status)
+			errResp.WriteJson(w)
 
 			return
 		}
 
-		WriteJsonResponse(w, resp.Data(), resp.Status())
+		resp.WriteJson(w)
 
 	})
 }

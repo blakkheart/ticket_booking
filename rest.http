@@ -1,5 +1,11 @@
 POST http://127.0.0.1:8080/api/login
+content-type: application/json
 
+{   
+    "email": "test@test.test6",
+    "name": "sample",
+    "password": "testPassword"
+}
 
 ###
 
@@ -9,16 +15,16 @@ POST http://127.0.0.1:8080/api/register
 content-type: application/json
 
 {   
-    "email": "test@test.test",
+    "email": "test@test.test6",
     "name": "sample",
     "password": "testPassword"
 }
 
 ###
 
-POST http://127.0.0.1:8080/api/get_ticket
+POST http://127.0.0.1:8080/api/ticket
 content-type: application/json
-authorization: Bearer xxx
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEwLCJyb2xlIjoibWVtYmVyIiwiaXNzIjoidGVzdCIsImV4cCI6MTc3Mjc4Nzc5OCwiaWF0IjoxNzcyNzAxMzk4fQ.3RJKzLxFIzqb0dLeFB9M2UwzUNoFhgX5lOQKiMtB0GM
 
 {
     "email": "test@test.test",
