@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"log"
 	"log/slog"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 	"github.com/casbin/casbin/v2"
 )
 
-func getRole(r *http.Request, jwt *auth.JWTManager) string {
+func getRole(r *http.Request, jwt *auth.JWTManager) (string, error) {
 	role := string(user.Anonymous)
 
 	token, tokenErr := auth.GetTokenFromPayload(r)
@@ -23,11 +24,13 @@ func getRole(r *http.Request, jwt *auth.JWTManager) string {
 
 		claims, err := jwt.Parse(token)
 
-		if err == nil {
+		if err != nil {
+			return "", errors.New("Invalid token")
+		} else {
 			role = claims.Role
 		}
 	}
-	return role
+	return role, nil
 }
 
 func Authorizer(e *casbin.Enforcer, jwt *auth.JWTManager) Middleware {
@@ -43,7 +46,12 @@ func Authorizer(e *casbin.Enforcer, jwt *auth.JWTManager) Middleware {
 				reqID = "UNKNOWN"
 			}
 
-			role := getRole(r, jwt)
+			role, err := getRole(r, jwt)
+
+			if err != nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 
 			slog.Debug("Enforcing auth", "requestID", reqID, "role", role, "path", r.URL.Path, "method", r.Method)
 

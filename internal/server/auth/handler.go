@@ -8,6 +8,7 @@ import (
 
 type Handler interface {
 	Login(w http.ResponseWriter, r *http.Request) (httpx.Response, error)
+	RefreshToken(w http.ResponseWriter, r *http.Request) (httpx.Response, error)
 	Routes(r *httpx.Router)
 }
 
@@ -21,4 +22,5 @@ func NewHandler(service auth.Service) Handler {
 
 func (h *handler) Routes(r *httpx.Router) {
 	r.Handle(http.MethodPost, "/auth/login", h.Login)
+	r.Handle(http.MethodPost, "/auth/refresh-token", h.RefreshToken)
 }

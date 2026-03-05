@@ -9,7 +9,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-
 // refresh_tokens:
 // - id
 // - user_id
@@ -17,7 +16,6 @@ import (
 // - expires_at
 // - revoked
 // - created_at
-
 
 func GetTokenFromPayload(r *http.Request) (string, error) {
 	reqToken := r.Header.Get("Authorization")
@@ -39,31 +37,53 @@ type Claims struct {
 }
 
 type JWTManager struct {
-	secret []byte
-	issuer string
-	ttl    time.Duration
+	secret     []byte
+	issuer     string
+	accessTTL  time.Duration
+	refreshTTL time.Duration
 }
 
-func NewJWTManager(secret string, issuer string, ttl time.Duration) *JWTManager {
+func NewJWTManager(
+	secret string,
+	issuer string,
+	accessTTL time.Duration,
+	refreshTTL time.Duration,
+) *JWTManager {
 	return &JWTManager{
-		secret: []byte(secret),
-		issuer: issuer,
-		ttl:    ttl,
+		secret:     []byte(secret),
+		issuer:     issuer,
+		accessTTL:  accessTTL,
+		refreshTTL: refreshTTL,
 	}
 }
 
-func (j *JWTManager) Generate(userID int64, role string) (string, error) {
+func (j *JWTManager) generateTokenWithTTL(userID int64, role string, ttl time.Duration) (string, error) {
 	claims := Claims{
 		UserID: userID,
 		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    j.issuer,
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.ttl)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(j.secret)
+}
+
+func (j *JWTManager) GenerateTokenPair(userID int64, role string) (*JWTTokens, error) {
+	accessToken, err := j.generateTokenWithTTL(userID, role, j.accessTTL)
+	if err != nil {
+		return nil, err
+	}
+	refreshToken, err := j.generateTokenWithTTL(userID, role, j.refreshTTL)
+	if err != nil {
+		return nil, err
+	}
+	return &JWTTokens{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
 }
 
 func (j *JWTManager) Parse(tokenStr string) (*Claims, error) {

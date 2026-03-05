@@ -28,6 +28,13 @@ CREATE TABLE booking (
     event_id bigint references event(id) NOT NULL,
     quantity integer NOT NULL
 );
+CREATE TABLE refresh_token (
+    user_id BIGSERIAL PRIMARY KEY ,
+    token_hash VARCHAR(512) NOT NULL UNIQUE,
+    expires_at timestamptz NOT NULL,
+    revoked BOOLEAN NOT NULL,
+    FOREIGN KEY(user_id) REFERENCES account(id)
+);
 -- +goose StatementEnd
 
 -- +goose Down
@@ -36,4 +43,5 @@ DROP TABLE account CASCADE;
 DROP TABLE event CASCADE;
 DROP TABLE ticket CASCADE;
 DROP TABLE booking CASCADE;
+DROP TABLE refresh_token CASCADE;
 -- +goose StatementEnd

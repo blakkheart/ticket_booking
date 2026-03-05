@@ -33,6 +33,13 @@ type Event struct {
 	Location    string     `json:"location"`
 }
 
+type RefreshToken struct {
+	UserID    int64     `json:"user_id"`
+	TokenHash string    `json:"token_hash"`
+	ExpiresAt time.Time `json:"expires_at"`
+	Revoked   bool      `json:"revoked"`
+}
+
 type Ticket struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`

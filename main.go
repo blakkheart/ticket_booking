@@ -37,7 +37,7 @@ func main() {
 		slog.Error("Error occured while initializing authentication", "error", authErr)
 	}
 
-	jwt := auth.NewJWTManager(config.AppConfigs.Auth.SecretKey, "test", 24*time.Hour)
+	jwt := auth.NewJWTManager(config.AppConfigs.Auth.SecretKey, "test", 24*time.Hour, 24*90*time.Hour)
 
 	dbPool := postgres.CreateConnection(&config.AppConfigs.DB)
 	defer dbPool.Close()
