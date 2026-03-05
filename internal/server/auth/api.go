@@ -31,8 +31,3 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) (httpx.Response,
 	return httpx.NewResponse(account, http.StatusOK), nil
 }
 
-func (h *handler) Authorize(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {
-
-	//utils.GetAccountFromToken(r)
-	return httpx.NewResponse(1, http.StatusOK), nil
-}

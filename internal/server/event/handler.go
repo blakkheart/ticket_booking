@@ -21,6 +21,6 @@ func NewHandler(service event.Service) Handler {
 }
 
 func (h *handler) Routes(r *httpx.Router) {
-	r.Handle(http.MethodPost, "/event", h.CreateEvent)
+	r.Handle(http.MethodPost, "/event/create", h.CreateEvent)
 	r.Handle(http.MethodPost, "/event/{id}", h.GetEvent)
 }

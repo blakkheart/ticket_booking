@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -35,7 +34,7 @@ func main() {
 		"./internal/config/casbin/policy.csv",
 	)
 	if authErr != nil {
-		log.Fatal(authErr)
+		slog.Error("Error occured while initializing authentication", "error", authErr)
 	}
 
 	jwt := auth.NewJWTManager(config.AppConfigs.Auth.SecretKey, "test", 24*time.Hour)

@@ -20,6 +20,6 @@ func NewHandler(service user.Service) UserHandler {
 }
 
 func (h *userHandler) Routes(r *httpx.Router) {
-	r.Handle(http.MethodPost, "/register", h.CreateAccount)
+	r.Handle(http.MethodPost, "/user/register", h.CreateAccount)
 
 }

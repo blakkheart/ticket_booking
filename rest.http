@@ -1,4 +1,4 @@
-POST http://127.0.0.1:8080/api/login
+POST http://127.0.0.1:8080/api/auth/login
 content-type: application/json
 
 {   
@@ -11,7 +11,7 @@ content-type: application/json
 
 
 
-POST http://127.0.0.1:8080/api/register
+POST http://127.0.0.1:8080/api/user/register
 content-type: application/json
 
 {   
@@ -22,7 +22,7 @@ content-type: application/json
 
 ###
 
-POST http://127.0.0.1:8080/api/ticket
+POST http://127.0.0.1:8080/api/ticket/create
 content-type: application/json
 authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEwLCJyb2xlIjoibWVtYmVyIiwiaXNzIjoidGVzdCIsImV4cCI6MTc3Mjc4Nzc5OCwiaWF0IjoxNzcyNzAxMzk4fQ.3RJKzLxFIzqb0dLeFB9M2UwzUNoFhgX5lOQKiMtB0GM
 
