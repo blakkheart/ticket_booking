@@ -33,7 +33,8 @@ func NewApp(pool *pgxpool.Pool, jwt *auth.JWTManager, logger *slog.Logger) *App 
 	bookingRepo := repository.NewBookingRepository(pool, logger)
 	bookingService := booking.NewService(bookingRepo, logger)
 
-	authService := auth.NewService(jwt, userService, logger)
+	authRepo := repository.NewAuthRepository(pool, logger)
+	authService := auth.NewService(authRepo, jwt, userService, logger)
 
 	return &App{
 		User:    userService,

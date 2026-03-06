@@ -85,3 +85,26 @@ func (q *Queries) GetTokenByUserID(ctx context.Context, userID int64) (RefreshTo
 	)
 	return i, err
 }
+
+const updateTokenByUserID = `-- name: UpdateTokenByUserID :exec
+UPDATE refresh_token
+SET token_hash = $2, expires_at = $3, revoked = $4 
+WHERE user_id = $1
+`
+
+type UpdateTokenByUserIDParams struct {
+	UserID    int64     `json:"user_id"`
+	TokenHash string    `json:"token_hash"`
+	ExpiresAt time.Time `json:"expires_at"`
+	Revoked   bool      `json:"revoked"`
+}
+
+func (q *Queries) UpdateTokenByUserID(ctx context.Context, arg UpdateTokenByUserIDParams) error {
+	_, err := q.db.Exec(ctx, updateTokenByUserID,
+		arg.UserID,
+		arg.TokenHash,
+		arg.ExpiresAt,
+		arg.Revoked,
+	)
+	return err
+}

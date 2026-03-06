@@ -36,16 +36,18 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) (httpx.Response,
 }
 
 func (h *handler) RefreshToken(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {
+	ctx := r.Context()
 
 	var token RefreshRequest
 	if err := json.NewDecoder(r.Body).Decode(&token); err != nil {
 		return nil, httpx.ErrInvalidRequestBody
 	}
 
-	_, err := h.service.ParseToken(token.RefreshToken)
+	claims, err := h.service.ParseToken(token.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
+	h.service.GetTokenByUserID(ctx, claims.UserID)
 
 	return httpx.NewResponse("1", http.StatusOK), nil
 }

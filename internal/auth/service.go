@@ -12,10 +12,13 @@ import (
 type Service interface {
 	Login(ctx context.Context, email string, password string) (*JWTTokens, error)
 	ParseToken(token string) (*Claims, error)
+	GetTokenByUserID(ctx context.Context, userID int64) (*RefreshToken, error)
+	UpdateTokenByUserID(ctx context.Context, newToken *RefreshToken) error
 }
 
-func NewService(jwt *JWTManager, userService user.Service, logger *slog.Logger) Service {
+func NewService(repo Repository, jwt *JWTManager, userService user.Service, logger *slog.Logger) Service {
 	return &authService{
+		Repo:        repo,
 		jwt:         jwt,
 		userServise: userService,
 		logger:      logger,
@@ -23,6 +26,7 @@ func NewService(jwt *JWTManager, userService user.Service, logger *slog.Logger) 
 }
 
 type authService struct {
+	Repo        Repository
 	jwt         *JWTManager
 	userServise user.Service
 	logger      *slog.Logger
@@ -33,7 +37,6 @@ func (s *authService) Login(ctx context.Context, email string, password string) 
 	if err != nil {
 		return nil, err
 	}
-	s.logger.Debug("passwords", "hashed", user.PasswordHash, "getted", password)
 	ok := s.verifyPassword(user.PasswordHash, password)
 	if !ok {
 		return nil, errors.New("Wrong password")
@@ -53,4 +56,12 @@ func (s *authService) verifyPassword(hashed string, password string) bool {
 
 func (s *authService) ParseToken(token string) (*Claims, error) {
 	return s.jwt.Parse(token)
+}
+
+func (s *authService) GetTokenByUserID(ctx context.Context, userID int64) (*RefreshToken, error) {
+	return s.Repo.GetTokenByUserID(ctx, userID)
+}
+
+func (s *authService) UpdateTokenByUserID(ctx context.Context, newToken *RefreshToken) error {
+	return s.Repo.UpdateTokenByUserID(ctx, newToken)
 }
