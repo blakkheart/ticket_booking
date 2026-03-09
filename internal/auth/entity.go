@@ -8,8 +8,18 @@ type JWTTokens struct {
 }
 
 type RefreshToken struct {
+	UserID     int64
+	TokenHash  string
+	ExpiresAt  time.Time
+	Revoked    bool
+	ReplacedBy int64
+	Token      string
+	Role       string
+}
+
+type AccessToken struct {
 	UserID    int64
-	TokenHash string
+	Token     string
 	ExpiresAt time.Time
-	Revoked   bool
+	Role      string
 }

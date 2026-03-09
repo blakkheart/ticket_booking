@@ -2,8 +2,11 @@ package authapi
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"ticket-booking/internal/auth"
 	"ticket-booking/internal/httpx"
+	"time"
 )
 
 type LoginRequest struct {
@@ -26,13 +29,27 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) (httpx.Response,
 		return nil, httpx.ErrInvalidRequestBody
 	}
 
-	account, err := h.service.Login(r.Context(), logReq.Email, logReq.Password)
+	tokens, err := h.service.Login(r.Context(), logReq.Email, logReq.Password)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return httpx.NewResponse(account, http.StatusOK), nil
+	claimsRefresh, err := h.service.GetTokenByHash(r.Context(), tokens.RefreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := h.service.UpdateTokenByUserID(r.Context(), &auth.RefreshToken{ // TODO Create or update
+		UserID:    claimsRefresh.UserID,
+		ExpiresAt: claimsRefresh.ExpiresAt,
+		Revoked:   false,
+		TokenHash: tokens.RefreshToken, // TODO hash that first
+	}); err != nil {
+		return nil, err
+	}
+
+	return httpx.NewResponse(tokens, http.StatusOK), nil
 }
 
 func (h *handler) RefreshToken(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {
@@ -47,7 +64,25 @@ func (h *handler) RefreshToken(w http.ResponseWriter, r *http.Request) (httpx.Re
 	if err != nil {
 		return nil, err
 	}
-	h.service.GetTokenByUserID(ctx, claims.UserID)
+	existedToken, err := h.service.GetTokenByUserID(ctx, claims.UserID)
 
-	return httpx.NewResponse("1", http.StatusOK), nil
+	if err != nil {
+		return nil, err
+	}
+	if existedToken.Revoked {
+		return nil, errors.New("Token revoked")
+	}
+	if existedToken.TokenHash != token.RefreshToken {
+		return nil, errors.New("Wrong token")
+	}
+	if time.Now().After(existedToken.ExpiresAt) {
+		return nil, errors.New("Token expired")
+	}
+
+	newToken, err := h.service.GenerateTokenPair(claims.UserID, claims.Role)
+	if err != nil {
+		return nil, err
+	}
+
+	return httpx.NewResponse(newToken, http.StatusOK), nil
 }

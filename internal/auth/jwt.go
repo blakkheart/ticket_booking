@@ -50,17 +50,34 @@ func NewJWTManager(
 }
 
 func (j *JWTManager) generateTokenWithTTL(userID int64, role string, ttl time.Duration) (string, error) {
+	expiresAt := time.Now().Add(ttl)
 	claims := Claims{
 		UserID: userID,
 		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    j.issuer,
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(j.secret)
+}
+
+func (j *JWTManager) GenerateAccessToken(userID int64, role string) (string, error) {
+	accessToken, err := j.generateTokenWithTTL(userID, role, j.accessTTL)
+	if err != nil {
+		return "", err
+	}
+	return accessToken, nil
+}
+
+func (j *JWTManager) GenerateRefreshToken(userID int64, role string) (string, error) {
+	refreshToken, err := j.generateTokenWithTTL(userID, role, j.refreshTTL)
+	if err != nil {
+		return "", err
+	}
+	return refreshToken, nil
 }
 
 func (j *JWTManager) GenerateTokenPair(userID int64, role string) (*JWTTokens, error) {
@@ -87,6 +104,7 @@ func (j *JWTManager) Parse(tokenStr string) (*Claims, error) {
 		},
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
 		jwt.WithExpirationRequired(),
+		jwt.WithIssuer(j.issuer),
 	)
 
 	if err != nil {

@@ -33,6 +33,7 @@ CREATE TABLE refresh_token (
     token_hash VARCHAR(512) NOT NULL UNIQUE,
     expires_at timestamptz NOT NULL,
     revoked BOOLEAN NOT NULL,
+    replaced_by BIGINT,
     FOREIGN KEY(user_id) REFERENCES account(id)
 );
 -- +goose StatementEnd
