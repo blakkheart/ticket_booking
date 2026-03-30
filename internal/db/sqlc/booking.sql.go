@@ -7,34 +7,43 @@ package sqlc_repository
 
 import (
 	"context"
+	"time"
 )
 
 const createBooking = `-- name: CreateBooking :one
-INSERT INTO booking (account_id, event_id, quantity)
-VALUES ($1, $2, $3)
-RETURNING id, account_id, event_id, quantity
+INSERT INTO booking (account_id, status, expires_at, paid_at)
+VALUES ($1, $2, $3, $4)
+RETURNING id, account_id, status, expires_at, paid_at, created_at
 `
 
 type CreateBookingParams struct {
-	AccountID int64 `json:"account_id"`
-	EventID   int64 `json:"event_id"`
-	Quantity  int32 `json:"quantity"`
+	AccountID int64      `json:"account_id"`
+	Status    string     `json:"status"`
+	ExpiresAt *time.Time `json:"expires_at"`
+	PaidAt    *time.Time `json:"paid_at"`
 }
 
 func (q *Queries) CreateBooking(ctx context.Context, arg CreateBookingParams) (Booking, error) {
-	row := q.db.QueryRow(ctx, createBooking, arg.AccountID, arg.EventID, arg.Quantity)
+	row := q.db.QueryRow(ctx, createBooking,
+		arg.AccountID,
+		arg.Status,
+		arg.ExpiresAt,
+		arg.PaidAt,
+	)
 	var i Booking
 	err := row.Scan(
 		&i.ID,
 		&i.AccountID,
-		&i.EventID,
-		&i.Quantity,
+		&i.Status,
+		&i.ExpiresAt,
+		&i.PaidAt,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getAllBookings = `-- name: GetAllBookings :many
-SELECT id, account_id, event_id, quantity FROM booking
+SELECT id, account_id, status, expires_at, paid_at, created_at FROM booking
 `
 
 func (q *Queries) GetAllBookings(ctx context.Context) ([]Booking, error) {
@@ -49,8 +58,10 @@ func (q *Queries) GetAllBookings(ctx context.Context) ([]Booking, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.AccountID,
-			&i.EventID,
-			&i.Quantity,
+			&i.Status,
+			&i.ExpiresAt,
+			&i.PaidAt,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}

@@ -7,30 +7,46 @@ package sqlc_repository
 import (
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"ticket-booking/internal/user"
 )
 
 type Account struct {
-	ID       int64     `json:"id"`
-	Name     string    `json:"name"`
-	Email    string    `json:"email"`
-	Password string    `json:"password"`
-	Role     user.Role `json:"role"`
+	ID        int64     `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	Role      user.Role `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type Booking struct {
-	ID        int64 `json:"id"`
-	AccountID int64 `json:"account_id"`
-	EventID   int64 `json:"event_id"`
-	Quantity  int32 `json:"quantity"`
+	ID        int64      `json:"id"`
+	AccountID int64      `json:"account_id"`
+	Status    string     `json:"status"`
+	ExpiresAt *time.Time `json:"expires_at"`
+	PaidAt    *time.Time `json:"paid_at"`
+	CreatedAt time.Time  `json:"created_at"`
+}
+
+type BookingItem struct {
+	ID             int64          `json:"id"`
+	BookingID      int64          `json:"booking_id"`
+	TicketTypeID   int64          `json:"ticket_type_id"`
+	Quantity       int32          `json:"quantity"`
+	PriceAtBooking pgtype.Numeric `json:"price_at_booking"`
 }
 
 type Event struct {
 	ID          int64      `json:"id"`
 	Title       string     `json:"title"`
-	Description string     `json:"description"`
-	Date        *time.Time `json:"date"`
+	Description *string    `json:"description"`
+	StartsAt    time.Time  `json:"starts_at"`
+	EndsAt      *time.Time `json:"ends_at"`
 	Location    string     `json:"location"`
+	Status      string     `json:"status"`
+	CreatedAt   time.Time  `json:"created_at"`
 }
 
 type RefreshToken struct {
@@ -41,11 +57,12 @@ type RefreshToken struct {
 	ReplacedBy *int64    `json:"replaced_by"`
 }
 
-type Ticket struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Price       int64  `json:"price"`
-	Quantity    int32  `json:"quantity"`
-	EventID     int64  `json:"event_id"`
+type TicketType struct {
+	ID                int64          `json:"id"`
+	Name              string         `json:"name"`
+	Description       *string        `json:"description"`
+	Price             pgtype.Numeric `json:"price"`
+	AvailableQuantity int32          `json:"available_quantity"`
+	EventID           int64          `json:"event_id"`
+	CreatedAt         time.Time      `json:"created_at"`
 }

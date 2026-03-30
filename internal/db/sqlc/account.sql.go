@@ -14,7 +14,7 @@ import (
 const createAccount = `-- name: CreateAccount :one
 INSERT INTO account (name, email, password, role)
 VALUES ($1, $2, $3, $4)
-RETURNING id, name, email, password, role
+RETURNING id, name, email, password, role, created_at, updated_at
 `
 
 type CreateAccountParams struct {
@@ -38,12 +38,14 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 		&i.Email,
 		&i.Password,
 		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getAccount = `-- name: GetAccount :one
-SELECT id, name, email, password, role FROM account
+SELECT id, name, email, password, role, created_at, updated_at FROM account
 WHERE id = $1
 `
 
@@ -56,12 +58,14 @@ func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
 		&i.Email,
 		&i.Password,
 		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getAccountByEmail = `-- name: GetAccountByEmail :one
-SELECT id, name, email, password, role FROM account
+SELECT id, name, email, password, role, created_at, updated_at FROM account
 WHERE email = $1
 `
 
@@ -74,12 +78,14 @@ func (q *Queries) GetAccountByEmail(ctx context.Context, email string) (Account,
 		&i.Email,
 		&i.Password,
 		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getAllAccounts = `-- name: GetAllAccounts :many
-SELECT id, name, email, password, role FROM account
+SELECT id, name, email, password, role, created_at, updated_at FROM account
 `
 
 func (q *Queries) GetAllAccounts(ctx context.Context) ([]Account, error) {
@@ -97,6 +103,8 @@ func (q *Queries) GetAllAccounts(ctx context.Context) ([]Account, error) {
 			&i.Email,
 			&i.Password,
 			&i.Role,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

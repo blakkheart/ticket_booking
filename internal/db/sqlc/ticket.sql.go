@@ -7,62 +7,66 @@ package sqlc_repository
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createTicket = `-- name: CreateTicket :one
-INSERT INTO ticket (name, description, price, quantity, event_id)
+INSERT INTO ticket_type (name, description, price, available_quantity, event_id)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, name, description, price, quantity, event_id
+RETURNING id, name, description, price, available_quantity, event_id, created_at
 `
 
 type CreateTicketParams struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Price       int64  `json:"price"`
-	Quantity    int32  `json:"quantity"`
-	EventID     int64  `json:"event_id"`
+	Name              string         `json:"name"`
+	Description       *string        `json:"description"`
+	Price             pgtype.Numeric `json:"price"`
+	AvailableQuantity int32          `json:"available_quantity"`
+	EventID           int64          `json:"event_id"`
 }
 
-func (q *Queries) CreateTicket(ctx context.Context, arg CreateTicketParams) (Ticket, error) {
+func (q *Queries) CreateTicket(ctx context.Context, arg CreateTicketParams) (TicketType, error) {
 	row := q.db.QueryRow(ctx, createTicket,
 		arg.Name,
 		arg.Description,
 		arg.Price,
-		arg.Quantity,
+		arg.AvailableQuantity,
 		arg.EventID,
 	)
-	var i Ticket
+	var i TicketType
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Description,
 		&i.Price,
-		&i.Quantity,
+		&i.AvailableQuantity,
 		&i.EventID,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getAllTickets = `-- name: GetAllTickets :many
-SELECT id, name, description, price, quantity, event_id FROM ticket
+SELECT id, name, description, price, available_quantity, event_id, created_at FROM ticket_type
 `
 
-func (q *Queries) GetAllTickets(ctx context.Context) ([]Ticket, error) {
+func (q *Queries) GetAllTickets(ctx context.Context) ([]TicketType, error) {
 	rows, err := q.db.Query(ctx, getAllTickets)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Ticket
+	var items []TicketType
 	for rows.Next() {
-		var i Ticket
+		var i TicketType
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.Description,
 			&i.Price,
-			&i.Quantity,
+			&i.AvailableQuantity,
 			&i.EventID,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -75,32 +79,36 @@ func (q *Queries) GetAllTickets(ctx context.Context) ([]Ticket, error) {
 }
 
 const getTicket = `-- name: GetTicket :one
-SELECT ticket.id, ticket.name, ticket.description, ticket.price, ticket.quantity, ticket.event_id, event.id, event.title, event.description, event.date, event.location
-FROM ticket
-JOIN event ON event.id == ticket.event_id
-WHERE ticket.id = $1
+SELECT ticket_type.id, ticket_type.name, ticket_type.description, ticket_type.price, ticket_type.available_quantity, ticket_type.event_id, ticket_type.created_at, event.id, event.title, event.description, event.starts_at, event.ends_at, event.location, event.status, event.created_at
+FROM ticket_type
+JOIN event ON event.id == ticket_type.event_id
+WHERE ticket_type.id = $1
 `
 
 type GetTicketRow struct {
-	Ticket Ticket `json:"ticket"`
-	Event  Event  `json:"event"`
+	TicketType TicketType `json:"ticket_type"`
+	Event      Event      `json:"event"`
 }
 
 func (q *Queries) GetTicket(ctx context.Context, id int64) (GetTicketRow, error) {
 	row := q.db.QueryRow(ctx, getTicket, id)
 	var i GetTicketRow
 	err := row.Scan(
-		&i.Ticket.ID,
-		&i.Ticket.Name,
-		&i.Ticket.Description,
-		&i.Ticket.Price,
-		&i.Ticket.Quantity,
-		&i.Ticket.EventID,
+		&i.TicketType.ID,
+		&i.TicketType.Name,
+		&i.TicketType.Description,
+		&i.TicketType.Price,
+		&i.TicketType.AvailableQuantity,
+		&i.TicketType.EventID,
+		&i.TicketType.CreatedAt,
 		&i.Event.ID,
 		&i.Event.Title,
 		&i.Event.Description,
-		&i.Event.Date,
+		&i.Event.StartsAt,
+		&i.Event.EndsAt,
 		&i.Event.Location,
+		&i.Event.Status,
+		&i.Event.CreatedAt,
 	)
 	return i, err
 }

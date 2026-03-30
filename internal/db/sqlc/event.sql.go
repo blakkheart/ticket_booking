@@ -11,38 +11,45 @@ import (
 )
 
 const createEvent = `-- name: CreateEvent :one
-INSERT INTO event (title, description, date, location)
-VALUES ($1, $2, $3, $4)
-RETURNING id, title, description, date, location
+INSERT INTO event (title, description, location, starts_at, ends_at, status)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, title, description, starts_at, ends_at, location, status, created_at
 `
 
 type CreateEventParams struct {
 	Title       string     `json:"title"`
-	Description string     `json:"description"`
-	Date        *time.Time `json:"date"`
+	Description *string    `json:"description"`
 	Location    string     `json:"location"`
+	StartsAt    time.Time  `json:"starts_at"`
+	EndsAt      *time.Time `json:"ends_at"`
+	Status      string     `json:"status"`
 }
 
 func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error) {
 	row := q.db.QueryRow(ctx, createEvent,
 		arg.Title,
 		arg.Description,
-		arg.Date,
 		arg.Location,
+		arg.StartsAt,
+		arg.EndsAt,
+		arg.Status,
 	)
 	var i Event
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
 		&i.Description,
-		&i.Date,
+		&i.StartsAt,
+		&i.EndsAt,
 		&i.Location,
+		&i.Status,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getAllEvents = `-- name: GetAllEvents :many
-SELECT id, title, description, date, location FROM event
+SELECT id, title, description, starts_at, ends_at, location, status, created_at FROM event
 `
 
 func (q *Queries) GetAllEvents(ctx context.Context) ([]Event, error) {
@@ -58,8 +65,11 @@ func (q *Queries) GetAllEvents(ctx context.Context) ([]Event, error) {
 			&i.ID,
 			&i.Title,
 			&i.Description,
-			&i.Date,
+			&i.StartsAt,
+			&i.EndsAt,
 			&i.Location,
+			&i.Status,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -72,7 +82,7 @@ func (q *Queries) GetAllEvents(ctx context.Context) ([]Event, error) {
 }
 
 const getEvent = `-- name: GetEvent :one
-SELECT id, title, description, date, location FROM event
+SELECT id, title, description, starts_at, ends_at, location, status, created_at FROM event
 WHERE id = $1
 `
 
@@ -83,8 +93,11 @@ func (q *Queries) GetEvent(ctx context.Context, id int64) (Event, error) {
 		&i.ID,
 		&i.Title,
 		&i.Description,
-		&i.Date,
+		&i.StartsAt,
+		&i.EndsAt,
 		&i.Location,
+		&i.Status,
+		&i.CreatedAt,
 	)
 	return i, err
 }

@@ -1,13 +1,13 @@
 -- name: GetAllTickets :many
-SELECT * FROM ticket;
+SELECT * FROM ticket_type;
 
 -- name: CreateTicket :one
-INSERT INTO ticket (name, description, price, quantity, event_id)
+INSERT INTO ticket_type (name, description, price, available_quantity, event_id)
 VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 
 -- name: GetTicket :one
-SELECT sqlc.embed(ticket), sqlc.embed(event)
-FROM ticket
-JOIN event ON event.id == ticket.event_id
-WHERE ticket.id = $1;
+SELECT sqlc.embed(ticket_type), sqlc.embed(event)
+FROM ticket_type
+JOIN event ON event.id == ticket_type.event_id
+WHERE ticket_type.id = $1;
