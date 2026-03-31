@@ -1,13 +1,18 @@
 package booking
 
+import "time"
+
 type Booking struct {
-	ID int64 `json:"id"`
+	ID        int64
+	AccountID int64
+	Status    string
+	ExpiresAt *time.Time
+	PaidAt    *time.Time
 }
 
-type BookingType struct {
-	ID           int
-	UserID       int
-	EventID      int
-	TicketTypeID int
-	Quantity     int
+type BookingIn struct {
+	AccountID int64
+	Status    string
+	ExpiresAt *time.Time
+	PaidAt    *time.Time
 }

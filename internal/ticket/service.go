@@ -6,9 +6,9 @@ import (
 )
 
 type Service interface {
-	Get(id int64) *Ticket
-	GetMany(filters any) []*Ticket
-	Create(ctx context.Context, user *Ticket) *Ticket
+	Get(id int64) *TicketType
+	GetMany(filters any) []*TicketType
+	Create(ctx context.Context, t *TicketTypeIn) *TicketType
 }
 
 func NewService(repo Repository, logger *slog.Logger) Service {
@@ -20,14 +20,14 @@ type ticketService struct {
 	logger *slog.Logger
 }
 
-func (service *ticketService) Get(id int64) *Ticket {
+func (service *ticketService) Get(id int64) *TicketType {
 	return nil
 }
 
-func (service *ticketService) GetMany(filters any) []*Ticket {
+func (service *ticketService) GetMany(filters any) []*TicketType {
 	return nil
 }
 
-func (service *ticketService) Create(ctx context.Context, user *Ticket) *Ticket {
+func (service *ticketService) Create(ctx context.Context, t *TicketTypeIn) *TicketType {
 	return nil
 }

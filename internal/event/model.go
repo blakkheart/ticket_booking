@@ -1,19 +1,24 @@
 package event
 
 import (
-	"ticket-booking/internal/ticket"
 	"time"
 )
 
 type Event struct {
-	ID int64 `json:"id"`
+	ID          int64
+	Title       string
+	Description *string
+	Location    string
+	StartsAt    time.Time
+	EndsAt      *time.Time
+	Status      string
 }
 
-type EventType struct {
-	ID          int
+type EventIn struct {
 	Title       string
-	Description string
-	Date        time.Time
+	Description *string
 	Location    string
-	TicketTypes []ticket.TicketType
+	StartsAt    time.Time
+	EndsAt      *time.Time
+	Status      string
 }

@@ -1,14 +1,20 @@
 package ticket
 
-type Ticket struct {
-	ID int64 `json:"id"`
-}
+import "ticket-booking/internal/money"
 
 type TicketType struct {
-	ID          int
-	Name        string
-	Description string
-	Price       float64
-	Quantity    int
-	EventID     int
+	ID                int64
+	Name              string
+	Description       *string
+	Price             money.Money
+	AvailableQuantity int32
+	EventID           int64
+}
+
+type TicketTypeIn struct {
+	Name              string
+	Description       *string
+	Price             money.Money
+	AvailableQuantity int32
+	EventID           int64
 }

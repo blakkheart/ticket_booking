@@ -9,7 +9,7 @@ import (
 type Service interface {
 	Get(id int64) *Event
 	GetMany(filters any) []*Event
-	Create(ctx context.Context, user *Event) *Event
+	Create(ctx context.Context, e *EventIn) *Event
 }
 
 func NewService(repo Repository, logger *slog.Logger) Service {
@@ -33,10 +33,10 @@ func (service *eventService) GetMany(filters any) []*Event {
 	return nil
 }
 
-func (service *eventService) Create(ctx context.Context, user *Event) *Event {
+func (service *eventService) Create(ctx context.Context, e *EventIn) *Event {
 
-	u := &Event{
-		ID: 1,
+	u := &EventIn{
+		Title: "1",
 	}
 
 	value, err := service.Repo.Create(ctx, u)

@@ -21,17 +21,20 @@ func NewEventRepository(db *pgxpool.Pool, logger *slog.Logger) *eventRepository 
 	}
 }
 
-func (repo *eventRepository) Create(ctx context.Context, user *eventModel.Event) (*eventModel.Event, error) {
-	account, err := repo.queries.CreateAccount(
+func (repo *eventRepository) Create(ctx context.Context, e *eventModel.EventIn) (*eventModel.Event, error) {
+	event, err := repo.queries.CreateEvent(
 		ctx,
-		sqlc_repository.CreateAccountParams{
-			Name:     "1",
-			Email:    "1",
-			Password: "1",
+		sqlc_repository.CreateEventParams{
+			Title:       e.Title,
+			Description: e.Description,
+			Location:    e.Location,
+			StartsAt:    e.StartsAt,
+			EndsAt:      e.EndsAt,
+			Status:      e.Status,
 		},
 	)
 
-	return repo.fromSqlcAccount(&account), err
+	return repo.fromSqlcEvent(&event), err
 }
 
 func (repo *eventRepository) Delete(id int64) error {
@@ -46,9 +49,15 @@ func (repo *eventRepository) GetMany(filter any) ([]*eventModel.Event, error) {
 	return nil, nil
 }
 
-func (repo *eventRepository) fromSqlcAccount(a *sqlc_repository.Account) *eventModel.Event {
-	account := &eventModel.Event{
-		ID: a.ID,
+func (repo *eventRepository) fromSqlcEvent(e *sqlc_repository.Event) *eventModel.Event {
+	event := &eventModel.Event{
+		ID:          e.ID,
+		Title:       e.Title,
+		Description: e.Description,
+		Location:    e.Location,
+		StartsAt:    e.StartsAt,
+		EndsAt:      e.EndsAt,
+		Status:      e.Status,
 	}
-	return account
+	return event
 }

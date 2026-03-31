@@ -21,13 +21,18 @@ func NewBookingRepository(db *pgxpool.Pool, logger *slog.Logger) *bookingReposit
 	}
 }
 
-func (repo *bookingRepository) Create(ctx context.Context, user *booking.Booking) (*booking.Booking, error) {
-	account, err := repo.queries.CreateAccount(
+func (repo *bookingRepository) Create(ctx context.Context, b *booking.BookingIn) (*booking.Booking, error) {
+	booking, err := repo.queries.CreateBooking(
 		ctx,
-		sqlc_repository.CreateAccountParams{},
+		sqlc_repository.CreateBookingParams{
+			AccountID: b.AccountID,
+			Status:    b.Status,
+			ExpiresAt: b.ExpiresAt,
+			PaidAt:    b.PaidAt,
+		},
 	)
 
-	return repo.fromSqlcAccount(&account), err
+	return repo.fromSqlcBooking(&booking), err
 }
 
 func (repo *bookingRepository) Delete(id int64) error {
@@ -42,9 +47,13 @@ func (repo *bookingRepository) GetMany(filter any) ([]*booking.Booking, error) {
 	return nil, nil
 }
 
-func (repo *bookingRepository) fromSqlcAccount(a *sqlc_repository.Account) *booking.Booking {
-	account := &booking.Booking{
-		ID: a.ID,
+func (repo *bookingRepository) fromSqlcBooking(b *sqlc_repository.Booking) *booking.Booking {
+	booking := &booking.Booking{
+		ID:        b.ID,
+		AccountID: b.AccountID,
+		Status:    b.Status,
+		ExpiresAt: b.ExpiresAt,
+		PaidAt:    b.PaidAt,
 	}
-	return account
+	return booking
 }

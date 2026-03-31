@@ -63,12 +63,12 @@ func (r *authRepository) UpdateTokenByUserID(ctx context.Context, newToken *auth
 }
 
 func (r *authRepository) fromSqlcAccount(rt *sqlc_repository.RefreshToken) *auth.RefreshToken {
-	account := &auth.RefreshToken{
+	refreshToken := &auth.RefreshToken{
 		UserID:     rt.UserID,
 		ExpiresAt:  rt.ExpiresAt,
 		Revoked:    rt.Revoked,
 		TokenHash:  rt.TokenHash,
 		ReplacedBy: *rt.ReplacedBy,
 	}
-	return account
+	return refreshToken
 }
