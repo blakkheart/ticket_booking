@@ -1,7 +1,4 @@
-package service
-
-type Payment struct {
-}
+package payment
 
 func (payment *Payment) pay() {
 

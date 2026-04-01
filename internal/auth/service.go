@@ -2,6 +2,8 @@ package auth
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"log/slog"
 	"ticket-booking/internal/user"
@@ -9,11 +11,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func hash(token string) string {
+	h := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(h[:])
+}
+
 type Service interface {
 	Login(ctx context.Context, email string, password string) (*JWTTokens, error)
 	ParseToken(token string) (*Claims, error)
 	GetTokenByUserID(ctx context.Context, userID int64) (*RefreshToken, error)
-	UpdateTokenByUserID(ctx context.Context, newToken *RefreshToken) error
+	UpdateTokenByUserID(ctx context.Context, newToken *RefreshToken) (*RefreshToken, error)
 	GenerateTokenPair(userID int64, role string) (*JWTTokens, error)
 	GenerateAccessToken(userID int64, role string) (string, error)
 	GenerateRefreshToken(userID int64, role string) (string, error)
@@ -54,7 +61,44 @@ func (s *authService) Login(ctx context.Context, email string, password string) 
 		return nil, errors.New("invalid credentials")
 	}
 
-	return s.GenerateTokenPair(user.ID, string(user.Role))
+	tokens, err := s.GenerateTokenPair(user.ID, string(user.Role))
+
+	claimsRefresh, err := s.ParseToken(tokens.RefreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshHashed := hash(tokens.RefreshToken)
+
+	_, errCreated := s.createOrUpdate(
+		ctx,
+		&RefreshToken{
+			UserID:    user.ID,
+			ExpiresAt: claimsRefresh.ExpiresAt.Time,
+			Revoked:   false,
+			TokenHash: refreshHashed,
+		},
+	)
+	if errCreated != nil {
+		return nil, errCreated
+	}
+
+	return tokens, nil
+
+}
+
+var RefreshTokenDuplicationError = errors.New("Duplication error")
+
+func (s *authService) createOrUpdate(ctx context.Context, refreshToken *RefreshToken) (*RefreshToken, error) {
+
+	_, errGet := s.Repo.GetTokenByUserID(ctx, refreshToken.UserID)
+
+	if errGet != nil {
+		createdToken, errCreate := s.Repo.Create(ctx, refreshToken)
+		return createdToken, errCreate
+	}
+
+	return s.Repo.UpdateTokenByUserID(ctx, refreshToken)
 }
 
 func (s *authService) GenerateTokenPair(userID int64, role string) (*JWTTokens, error) {
@@ -94,6 +138,6 @@ func (s *authService) GetTokenByHash(ctx context.Context, tokenHash string) (*Re
 	return s.Repo.GetTokenByHash(ctx, tokenHash)
 }
 
-func (s *authService) UpdateTokenByUserID(ctx context.Context, newToken *RefreshToken) error {
+func (s *authService) UpdateTokenByUserID(ctx context.Context, newToken *RefreshToken) (*RefreshToken, error) {
 	return s.Repo.UpdateTokenByUserID(ctx, newToken)
 }

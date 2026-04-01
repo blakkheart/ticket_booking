@@ -11,10 +11,11 @@ SELECT * FROM refresh_token
 WHERE user_id = $1;
 
 
--- name: UpdateTokenByUserID :exec
+-- name: UpdateTokenByUserID :one
 UPDATE refresh_token
 SET token_hash = $2, expires_at = $3, revoked = $4, replaced_by = $5
-WHERE user_id = $1;
+WHERE user_id = $1
+RETURNING *;
 
 
 -- name: GetTokenByHash :one

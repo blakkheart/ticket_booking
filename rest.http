@@ -9,8 +9,6 @@ content-type: application/json
 
 ###
 
-
-
 POST http://127.0.0.1:8080/api/user/register
 content-type: application/json
 
@@ -22,9 +20,9 @@ content-type: application/json
 
 ###
 
-POST http://127.0.0.1:8080/api/ticket/create
+POST http://127.0.0.1:8080/api/booking/create
 content-type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsInJvbGUiOiJtZW1iZXIiLCJpc3MiOiJ0ZXN0IiwiZXhwIjoxNzcyODAxNzkzLCJpYXQiOjE3NzI4MDE3Njl9.x8EplruU1r4qY-9kgeF2WERBppPwRwlCx03IWTkGzB4
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsInJvbGUiOiJtZW1iZXIiLCJpc3MiOiJ0ZXN0IiwiZXhwIjoxNzc1MTU4MTQzLCJpYXQiOjE3NzUwNzE3NDN9.RqK7uLZXWJvGcJO5BudP_0SobJ7lQTNfU-OncgQK17I
 
 {
     "email": "test@test.test",

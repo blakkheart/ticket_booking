@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"ticket-booking/internal/auth"
 	"ticket-booking/internal/booking"
+	bookingitems "ticket-booking/internal/booking_items"
 	"ticket-booking/internal/event"
 	"ticket-booking/internal/infrastructure/postgres/repository"
 	"ticket-booking/internal/ticket"
@@ -13,11 +14,12 @@ import (
 )
 
 type App struct {
-	User    user.Service
-	Event   event.Service
-	Ticket  ticket.Service
-	Booking booking.Service
-	Auth    auth.Service
+	User         user.Service
+	Event        event.Service
+	Ticket       ticket.Service
+	BookingItems bookingitems.Service
+	Booking      booking.Service
+	Auth         auth.Service
 }
 
 func NewApp(pool *pgxpool.Pool, jwt *auth.JWTManager, logger *slog.Logger) *App {
@@ -30,17 +32,21 @@ func NewApp(pool *pgxpool.Pool, jwt *auth.JWTManager, logger *slog.Logger) *App 
 	ticketRepo := repository.NewTicketRepository(pool, logger)
 	ticketService := ticket.NewService(ticketRepo, logger)
 
+	bookingItemsRepo := repository.NewBookingItemsRepository(pool, logger)
+	bookingItemsService := bookingitems.NewService(bookingItemsRepo, logger)
+
 	bookingRepo := repository.NewBookingRepository(pool, logger)
-	bookingService := booking.NewService(bookingRepo, logger)
+	bookingService := booking.NewService(bookingRepo, eventRepo, bookingItemsRepo, ticketRepo, logger)
 
 	authRepo := repository.NewAuthRepository(pool, logger)
 	authService := auth.NewService(authRepo, jwt, userService, logger)
 
 	return &App{
-		User:    userService,
-		Event:   eventService,
-		Ticket:  ticketService,
-		Booking: bookingService,
-		Auth:    authService,
+		User:         userService,
+		Event:        eventService,
+		Ticket:       ticketService,
+		BookingItems: bookingItemsService,
+		Booking:      bookingService,
+		Auth:         authService,
 	}
 }

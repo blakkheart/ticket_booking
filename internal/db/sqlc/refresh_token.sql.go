@@ -13,7 +13,7 @@ import (
 const createToken = `-- name: CreateToken :one
 INSERT INTO refresh_token (user_id, token_hash, expires_at, revoked, replaced_by)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING user_id, token_hash, expires_at, revoked, replaced_by
+RETURNING id, user_id, token_hash, expires_at, revoked, replaced_by, created_at
 `
 
 type CreateTokenParams struct {
@@ -34,17 +34,19 @@ func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (Refre
 	)
 	var i RefreshToken
 	err := row.Scan(
+		&i.ID,
 		&i.UserID,
 		&i.TokenHash,
 		&i.ExpiresAt,
 		&i.Revoked,
 		&i.ReplacedBy,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getAllTokens = `-- name: GetAllTokens :many
-SELECT user_id, token_hash, expires_at, revoked, replaced_by FROM refresh_token
+SELECT id, user_id, token_hash, expires_at, revoked, replaced_by, created_at FROM refresh_token
 `
 
 func (q *Queries) GetAllTokens(ctx context.Context) ([]RefreshToken, error) {
@@ -57,11 +59,13 @@ func (q *Queries) GetAllTokens(ctx context.Context) ([]RefreshToken, error) {
 	for rows.Next() {
 		var i RefreshToken
 		if err := rows.Scan(
+			&i.ID,
 			&i.UserID,
 			&i.TokenHash,
 			&i.ExpiresAt,
 			&i.Revoked,
 			&i.ReplacedBy,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -74,7 +78,7 @@ func (q *Queries) GetAllTokens(ctx context.Context) ([]RefreshToken, error) {
 }
 
 const getTokenByHash = `-- name: GetTokenByHash :one
-SELECT user_id, token_hash, expires_at, revoked, replaced_by FROM refresh_token
+SELECT id, user_id, token_hash, expires_at, revoked, replaced_by, created_at FROM refresh_token
 WHERE token_hash = $1
 `
 
@@ -82,17 +86,19 @@ func (q *Queries) GetTokenByHash(ctx context.Context, tokenHash string) (Refresh
 	row := q.db.QueryRow(ctx, getTokenByHash, tokenHash)
 	var i RefreshToken
 	err := row.Scan(
+		&i.ID,
 		&i.UserID,
 		&i.TokenHash,
 		&i.ExpiresAt,
 		&i.Revoked,
 		&i.ReplacedBy,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getTokenByUserID = `-- name: GetTokenByUserID :one
-SELECT user_id, token_hash, expires_at, revoked, replaced_by FROM refresh_token
+SELECT id, user_id, token_hash, expires_at, revoked, replaced_by, created_at FROM refresh_token
 WHERE user_id = $1
 `
 
@@ -100,19 +106,22 @@ func (q *Queries) GetTokenByUserID(ctx context.Context, userID int64) (RefreshTo
 	row := q.db.QueryRow(ctx, getTokenByUserID, userID)
 	var i RefreshToken
 	err := row.Scan(
+		&i.ID,
 		&i.UserID,
 		&i.TokenHash,
 		&i.ExpiresAt,
 		&i.Revoked,
 		&i.ReplacedBy,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
-const updateTokenByUserID = `-- name: UpdateTokenByUserID :exec
+const updateTokenByUserID = `-- name: UpdateTokenByUserID :one
 UPDATE refresh_token
 SET token_hash = $2, expires_at = $3, revoked = $4, replaced_by = $5
 WHERE user_id = $1
+RETURNING id, user_id, token_hash, expires_at, revoked, replaced_by, created_at
 `
 
 type UpdateTokenByUserIDParams struct {
@@ -123,13 +132,23 @@ type UpdateTokenByUserIDParams struct {
 	ReplacedBy *int64    `json:"replaced_by"`
 }
 
-func (q *Queries) UpdateTokenByUserID(ctx context.Context, arg UpdateTokenByUserIDParams) error {
-	_, err := q.db.Exec(ctx, updateTokenByUserID,
+func (q *Queries) UpdateTokenByUserID(ctx context.Context, arg UpdateTokenByUserIDParams) (RefreshToken, error) {
+	row := q.db.QueryRow(ctx, updateTokenByUserID,
 		arg.UserID,
 		arg.TokenHash,
 		arg.ExpiresAt,
 		arg.Revoked,
 		arg.ReplacedBy,
 	)
-	return err
+	var i RefreshToken
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TokenHash,
+		&i.ExpiresAt,
+		&i.Revoked,
+		&i.ReplacedBy,
+		&i.CreatedAt,
+	)
+	return i, err
 }

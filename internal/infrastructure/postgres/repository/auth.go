@@ -2,10 +2,12 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"ticket-booking/internal/auth"
 	sqlc_repository "ticket-booking/internal/db/sqlc"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -29,11 +31,20 @@ func (r *authRepository) Create(ctx context.Context, token *auth.RefreshToken) (
 			ExpiresAt:  token.ExpiresAt,
 			Revoked:    token.Revoked,
 			TokenHash:  token.TokenHash,
-			ReplacedBy: &token.ReplacedBy,
+			ReplacedBy: token.ReplacedBy,
 		},
 	)
 
-	return r.fromSqlcAccount(&t), err
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" && pgErr.ConstraintName == "account_email_key" {
+				return nil, auth.RefreshTokenDuplicationError
+			}
+		}
+	}
+
+	return r.fromSqlcAuth(&t), err
 }
 
 func (r *authRepository) GetTokenByUserID(ctx context.Context, userID int64) (*auth.RefreshToken, error) {
@@ -41,7 +52,7 @@ func (r *authRepository) GetTokenByUserID(ctx context.Context, userID int64) (*a
 	if err != nil {
 		return nil, err
 	}
-	return r.fromSqlcAccount(&token), nil
+	return r.fromSqlcAuth(&token), nil
 }
 
 func (r *authRepository) GetTokenByHash(ctx context.Context, tokenHash string) (*auth.RefreshToken, error) {
@@ -49,26 +60,30 @@ func (r *authRepository) GetTokenByHash(ctx context.Context, tokenHash string) (
 	if err != nil {
 		return nil, err
 	}
-	return r.fromSqlcAccount(&token), nil
+	return r.fromSqlcAuth(&token), nil
 }
 
-func (r *authRepository) UpdateTokenByUserID(ctx context.Context, newToken *auth.RefreshToken) error {
-	return r.queries.UpdateTokenByUserID(ctx, sqlc_repository.UpdateTokenByUserIDParams{
+func (r *authRepository) UpdateTokenByUserID(ctx context.Context, newToken *auth.RefreshToken) (*auth.RefreshToken, error) {
+	token, err := r.queries.UpdateTokenByUserID(ctx, sqlc_repository.UpdateTokenByUserIDParams{
 		UserID:     newToken.UserID,
 		TokenHash:  newToken.TokenHash,
 		ExpiresAt:  newToken.ExpiresAt,
 		Revoked:    newToken.Revoked,
-		ReplacedBy: &newToken.ReplacedBy,
+		ReplacedBy: newToken.ReplacedBy,
 	})
+	if err != nil {
+		return nil, err
+	}
+	return r.fromSqlcAuth(&token), nil
 }
 
-func (r *authRepository) fromSqlcAccount(rt *sqlc_repository.RefreshToken) *auth.RefreshToken {
+func (r *authRepository) fromSqlcAuth(rt *sqlc_repository.RefreshToken) *auth.RefreshToken {
 	refreshToken := &auth.RefreshToken{
 		UserID:     rt.UserID,
 		ExpiresAt:  rt.ExpiresAt,
 		Revoked:    rt.Revoked,
 		TokenHash:  rt.TokenHash,
-		ReplacedBy: *rt.ReplacedBy,
+		ReplacedBy: rt.ReplacedBy,
 	}
 	return refreshToken
 }

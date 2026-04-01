@@ -49,7 +49,7 @@ CREATE TABLE booking (
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_booking_user_id ON booking(user_id);
+CREATE INDEX idx_booking_account_id ON booking(account_id);
 CREATE INDEX idx_booking_status ON booking(status);
 CREATE INDEX idx_booking_expires_at ON booking(expires_at);
 
@@ -66,22 +66,28 @@ CREATE INDEX idx_booking_items_booking_id ON booking_items(booking_id);
 CREATE INDEX idx_booking_items_ticket_type_id ON booking_items(ticket_type_id);
 
 CREATE TABLE refresh_token (
-    user_id BIGSERIAL PRIMARY KEY ,
-    
+    id BIGSERIAL PRIMARY KEY,
+
+    user_id BIGINT NOT NULL,
     token_hash VARCHAR(512) NOT NULL UNIQUE,
     expires_at TIMESTAMPTZ NOT NULL,
-    revoked BOOLEAN NOT NULL,
+    revoked BOOLEAN NOT NULL DEFAULT FALSE, 
     replaced_by BIGINT,
-    
-    FOREIGN KEY(user_id) REFERENCES account(id)
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    FOREIGN KEY (user_id) REFERENCES account(id),
+    FOREIGN KEY (replaced_by) REFERENCES refresh_token(id)
 );
+CREATE INDEX idx_refresh_token_user_id ON refresh_token(user_id);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE account CASCADE;
-DROP TABLE event CASCADE;
-DROP TABLE ticket CASCADE;
-DROP TABLE booking CASCADE;
-DROP TABLE refresh_token CASCADE;
+DROP TABLE IF EXISTS account CASCADE;
+DROP TABLE IF EXISTS event CASCADE;
+DROP TABLE IF EXISTS ticket_type CASCADE;
+DROP TABLE IF EXISTS booking CASCADE;
+DROP TABLE IF EXISTS booking_items CASCADE;
+DROP TABLE IF EXISTS refresh_token CASCADE;
 -- +goose StatementEnd

@@ -12,7 +12,7 @@ type RefreshToken struct {
 	TokenHash  string
 	ExpiresAt  time.Time
 	Revoked    bool
-	ReplacedBy int64
+	ReplacedBy *int64
 	Token      string
 	Role       string
 }

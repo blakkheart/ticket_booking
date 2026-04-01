@@ -50,11 +50,13 @@ type Event struct {
 }
 
 type RefreshToken struct {
+	ID         int64     `json:"id"`
 	UserID     int64     `json:"user_id"`
 	TokenHash  string    `json:"token_hash"`
 	ExpiresAt  time.Time `json:"expires_at"`
 	Revoked    bool      `json:"revoked"`
 	ReplacedBy *int64    `json:"replaced_by"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type TicketType struct {

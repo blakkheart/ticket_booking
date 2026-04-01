@@ -81,11 +81,11 @@ func (j *JWTManager) GenerateRefreshToken(userID int64, role string) (string, er
 }
 
 func (j *JWTManager) GenerateTokenPair(userID int64, role string) (*JWTTokens, error) {
-	accessToken, err := j.generateTokenWithTTL(userID, role, j.accessTTL)
+	accessToken, err := j.GenerateAccessToken(userID, role)
 	if err != nil {
 		return nil, err
 	}
-	refreshToken, err := j.generateTokenWithTTL(userID, role, j.refreshTTL)
+	refreshToken, err := j.GenerateRefreshToken(userID, role)
 	if err != nil {
 		return nil, err
 	}

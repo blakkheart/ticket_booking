@@ -25,6 +25,7 @@ func getRole(r *http.Request, jwt *auth.JWTManager) (string, error) {
 		claims, err := jwt.Parse(token)
 
 		if err != nil {
+			slog.Error(err.Error())
 			return "", errors.New("Invalid token")
 		} else {
 			role = claims.Role

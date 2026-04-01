@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"ticket-booking/internal/auth"
 	"ticket-booking/internal/httpx"
 	"time"
 )
@@ -32,20 +31,6 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) (httpx.Response,
 	tokens, err := h.service.Login(r.Context(), logReq.Email, logReq.Password)
 
 	if err != nil {
-		return nil, err
-	}
-
-	claimsRefresh, err := h.service.GetTokenByHash(r.Context(), tokens.RefreshToken)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := h.service.UpdateTokenByUserID(r.Context(), &auth.RefreshToken{ // TODO Create or update
-		UserID:    claimsRefresh.UserID,
-		ExpiresAt: claimsRefresh.ExpiresAt,
-		Revoked:   false,
-		TokenHash: tokens.RefreshToken, // TODO hash that first
-	}); err != nil {
 		return nil, err
 	}
 
