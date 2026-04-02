@@ -6,7 +6,7 @@ INSERT INTO ticket_type (name, description, price, available_quantity, event_id)
 VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 
--- name: GetTicket :one
+-- name: GetTicketByID :one
 SELECT sqlc.embed(ticket_type), sqlc.embed(event)
 FROM ticket_type
 JOIN event ON event.id == ticket_type.event_id

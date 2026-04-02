@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"ticket-booking/internal/booking"
 	"ticket-booking/internal/user"
 )
 
@@ -22,12 +23,12 @@ type Account struct {
 }
 
 type Booking struct {
-	ID        int64      `json:"id"`
-	AccountID int64      `json:"account_id"`
-	Status    string     `json:"status"`
-	ExpiresAt *time.Time `json:"expires_at"`
-	PaidAt    *time.Time `json:"paid_at"`
-	CreatedAt time.Time  `json:"created_at"`
+	ID        int64                 `json:"id"`
+	AccountID int64                 `json:"account_id"`
+	Status    booking.BookingStatus `json:"status"`
+	ExpiresAt *time.Time            `json:"expires_at"`
+	PaidAt    *time.Time            `json:"paid_at"`
+	CreatedAt time.Time             `json:"created_at"`
 }
 
 type BookingItem struct {

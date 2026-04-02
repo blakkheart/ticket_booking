@@ -22,12 +22,20 @@ content-type: application/json
 
 POST http://127.0.0.1:8080/api/booking/create
 content-type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsInJvbGUiOiJtZW1iZXIiLCJpc3MiOiJ0ZXN0IiwiZXhwIjoxNzc1MTU4MTQzLCJpYXQiOjE3NzUwNzE3NDN9.RqK7uLZXWJvGcJO5BudP_0SobJ7lQTNfU-OncgQK17I
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsInJvbGUiOiJtZW1iZXIiLCJpc3MiOiJ0ZXN0IiwiZXhwIjoxNzc1MjQ0NzUzLCJpYXQiOjE3NzUxNTgzNTN9.Pu2SnRuVxTpIf-Gax58xa-OPsarvvcwlctcCDwjSDFM
 
 {
-    "email": "test@test.test",
-    "name": "sample",
-    "password": "testPassword"
+    "event_id": 123,
+	"items": [
+	    {
+	        "ticket_type_id": 1,
+	        "quantity": 2
+	    },
+		{
+	        "ticket_type_id": 2,
+	        "quantity": 3
+	    }
+	]
 }
 
 ###

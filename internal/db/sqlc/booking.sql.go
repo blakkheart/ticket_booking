@@ -8,6 +8,8 @@ package sqlc_repository
 import (
 	"context"
 	"time"
+
+	"ticket-booking/internal/booking"
 )
 
 const createBooking = `-- name: CreateBooking :one
@@ -17,10 +19,10 @@ RETURNING id, account_id, status, expires_at, paid_at, created_at
 `
 
 type CreateBookingParams struct {
-	AccountID int64      `json:"account_id"`
-	Status    string     `json:"status"`
-	ExpiresAt *time.Time `json:"expires_at"`
-	PaidAt    *time.Time `json:"paid_at"`
+	AccountID int64                 `json:"account_id"`
+	Status    booking.BookingStatus `json:"status"`
+	ExpiresAt *time.Time            `json:"expires_at"`
+	PaidAt    *time.Time            `json:"paid_at"`
 }
 
 func (q *Queries) CreateBooking(ctx context.Context, arg CreateBookingParams) (Booking, error) {

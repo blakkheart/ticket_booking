@@ -27,3 +27,7 @@ sql:
               type: "UUID"
           - column: "account.role"
             go_type: "ticket-booking/internal/user.Role"
+          - column: "booking.status"
+            go_type: "ticket-booking/internal/booking.BookingStatus"
+          - column: "booking.status"
+            go_type: "ticket-booking/internal/booking.BookingStatus"

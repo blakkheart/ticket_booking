@@ -78,21 +78,21 @@ func (q *Queries) GetAllTickets(ctx context.Context) ([]TicketType, error) {
 	return items, nil
 }
 
-const getTicket = `-- name: GetTicket :one
+const getTicketByID = `-- name: GetTicketByID :one
 SELECT ticket_type.id, ticket_type.name, ticket_type.description, ticket_type.price, ticket_type.available_quantity, ticket_type.event_id, ticket_type.created_at, event.id, event.title, event.description, event.starts_at, event.ends_at, event.location, event.status, event.created_at
 FROM ticket_type
 JOIN event ON event.id == ticket_type.event_id
 WHERE ticket_type.id = $1
 `
 
-type GetTicketRow struct {
+type GetTicketByIDRow struct {
 	TicketType TicketType `json:"ticket_type"`
 	Event      Event      `json:"event"`
 }
 
-func (q *Queries) GetTicket(ctx context.Context, id int64) (GetTicketRow, error) {
-	row := q.db.QueryRow(ctx, getTicket, id)
-	var i GetTicketRow
+func (q *Queries) GetTicketByID(ctx context.Context, id int64) (GetTicketByIDRow, error) {
+	row := q.db.QueryRow(ctx, getTicketByID, id)
+	var i GetTicketByIDRow
 	err := row.Scan(
 		&i.TicketType.ID,
 		&i.TicketType.Name,

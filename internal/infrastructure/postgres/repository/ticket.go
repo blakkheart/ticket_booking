@@ -40,22 +40,26 @@ func (repo *ticketRepository) Create(ctx context.Context, t *ticket.TicketTypeIn
 		},
 	)
 
-	return repo.fromSqlcAccount(&ticket), err
+	return repo.fromSqlcTicket(&ticket), err
 }
 
 func (repo *ticketRepository) Delete(id int64) error {
 	return nil
 }
 
-func (repo *ticketRepository) Get(id int64) (*ticket.TicketType, error) {
-	return nil, nil
+func (repo *ticketRepository) Get(ctx context.Context, id int64) (*ticket.TicketType, error) {
+	ticketWithEvent, err := repo.queries.GetTicketByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return repo.fromSqlcTicket(&ticketWithEvent.TicketType), nil
 }
 
 func (repo *ticketRepository) GetMany(filter any) ([]*ticket.TicketType, error) {
 	return nil, nil
 }
 
-func (repo *ticketRepository) fromSqlcAccount(t *sqlc_repository.TicketType) *ticket.TicketType {
+func (repo *ticketRepository) fromSqlcTicket(t *sqlc_repository.TicketType) *ticket.TicketType {
 	var priceStr string
 	_ = t.Price.Scan(&priceStr)
 	moneyType, _ := money.NewMoney(priceStr)

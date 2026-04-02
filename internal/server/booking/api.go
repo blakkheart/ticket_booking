@@ -1,6 +1,7 @@
 package bookingapi
 
 import (
+	"encoding/json"
 	"net/http"
 	"ticket-booking/internal/booking"
 	"ticket-booking/internal/httpx"
@@ -18,9 +19,22 @@ func (h *handler) GetBooking(w http.ResponseWriter, r *http.Request) (httpx.Resp
 }
 
 func (h *handler) CreateBooking(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {
-	newBooking, err := h.service.Create(r.Context(), &booking.BookingIn{})
+	var breq booking.CreateBookingRequest
+	if errorJson := json.NewDecoder(r.Body).Decode(&breq); errorJson != nil {
+		return nil, httpx.ErrInvalidRequestBody
+	}
+
+	newBooking, err := h.service.Create(r.Context(), &breq)
 	if err != nil {
 		return nil, ResolveHTTPError(err)
 	}
-	return httpx.NewResponse(newBooking, http.StatusCreated), nil
+
+	// totalPrice, _ := money.NewMoney("1")
+	response := booking.CreateBookingResponse{
+		BookingId:  newBooking.ID,
+		Status:     newBooking.Status,
+		TotalPrice: "1",
+	}
+
+	return httpx.NewResponse(response, http.StatusCreated), nil
 }
