@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"ticket-booking/internal/booking"
+	"ticket-booking/internal/booking/models"
 	"ticket-booking/internal/httpx"
 )
 
@@ -26,7 +26,7 @@ func (h *handler) CreateBooking(w http.ResponseWriter, r *http.Request) (httpx.R
 		return nil, ResolveHTTPError(errors.New("Something wrong with user"))
 	}
 
-	var breq booking.CreateBookingRequest
+	var breq models.CreateBookingRequest
 	if errorJson := json.NewDecoder(r.Body).Decode(&breq); errorJson != nil {
 		return nil, httpx.ErrInvalidRequestBody
 	}
@@ -37,7 +37,7 @@ func (h *handler) CreateBooking(w http.ResponseWriter, r *http.Request) (httpx.R
 	}
 
 	// totalPrice, _ := money.NewMoney("1")
-	response := booking.CreateBookingResponse{
+	response := models.CreateBookingResponse{
 		BookingId:  newBooking.ID,
 		Status:     newBooking.Status,
 		TotalPrice: "1",

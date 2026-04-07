@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"ticket-booking/internal/booking"
-	bookingitems "ticket-booking/internal/booking_items"
+	"ticket-booking/internal/booking_items/models"
 	sqlc_repository "ticket-booking/internal/db/sqlc"
 	"ticket-booking/internal/money"
 
@@ -26,7 +26,14 @@ func NewBookingItemsRepository(db *pgxpool.Pool, logger *slog.Logger) *bookingIt
 	}
 }
 
-func (repo *bookingItemsRepository) Create(ctx context.Context, b *bookingitems.BookingItemIn) (*bookingitems.BookingItem, error) {
+func NewBookingItemsRepositoryFromQueries(q *sqlc_repository.Queries, logger *slog.Logger) *bookingItemsRepository {
+	return &bookingItemsRepository{
+		queries: q,
+		logger:  logger,
+	}
+}
+
+func (repo *bookingItemsRepository) Create(ctx context.Context, b *models.BookingItemIn) (*models.BookingItem, error) {
 	var price pgtype.Numeric
 	if err := price.Scan(b.PriceAtBooking.String()); err != nil {
 		return nil, err
@@ -59,20 +66,20 @@ func (repo *bookingItemsRepository) Delete(id int64) error {
 	return nil
 }
 
-func (repo *bookingItemsRepository) Get(id int64) (*bookingitems.BookingItem, error) {
+func (repo *bookingItemsRepository) Get(id int64) (*models.BookingItem, error) {
 	return nil, nil
 }
 
-func (repo *bookingItemsRepository) GetMany(filter any) ([]*bookingitems.BookingItem, error) {
+func (repo *bookingItemsRepository) GetMany(filter any) ([]*models.BookingItem, error) {
 	return nil, nil
 }
 
-func (repo *bookingItemsRepository) fromSqlcBooking(b *sqlc_repository.BookingItem) *bookingitems.BookingItem {
+func (repo *bookingItemsRepository) fromSqlcBooking(b *sqlc_repository.BookingItem) *models.BookingItem {
 	var priceStr string
 	_ = b.PriceAtBooking.Scan(&priceStr)
 	moneyType, _ := money.NewMoney(priceStr)
 
-	bookingItem := &bookingitems.BookingItem{
+	bookingItem := &models.BookingItem{
 		ID:             b.ID,
 		BookingID:      b.BookingID,
 		TicketTypeID:   b.TicketTypeID,

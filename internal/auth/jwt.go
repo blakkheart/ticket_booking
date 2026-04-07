@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"ticket-booking/internal/auth/models"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -80,7 +81,7 @@ func (j *JWTManager) GenerateRefreshToken(userID int64, role string) (string, er
 	return refreshToken, nil
 }
 
-func (j *JWTManager) GenerateTokenPair(userID int64, role string) (*JWTTokens, error) {
+func (j *JWTManager) GenerateTokenPair(userID int64, role string) (*models.JWTTokens, error) {
 	accessToken, err := j.GenerateAccessToken(userID, role)
 	if err != nil {
 		return nil, err
@@ -89,7 +90,7 @@ func (j *JWTManager) GenerateTokenPair(userID int64, role string) (*JWTTokens, e
 	if err != nil {
 		return nil, err
 	}
-	return &JWTTokens{
+	return &models.JWTTokens{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil

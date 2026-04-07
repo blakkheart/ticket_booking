@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	sqlc_repository "ticket-booking/internal/db/sqlc"
 	"ticket-booking/internal/money"
-	"ticket-booking/internal/ticket"
+	"ticket-booking/internal/ticket/models"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -23,7 +23,14 @@ func NewTicketRepository(db *pgxpool.Pool, logger *slog.Logger) *ticketRepositor
 	}
 }
 
-func (repo *ticketRepository) Create(ctx context.Context, t *ticket.TicketTypeIn) (*ticket.TicketType, error) {
+func NewTicketRepositoryFromQueries(q *sqlc_repository.Queries, logger *slog.Logger) *ticketRepository {
+	return &ticketRepository{
+		queries: q,
+		logger:  logger,
+	}
+}
+
+func (repo *ticketRepository) Create(ctx context.Context, t *models.TicketTypeIn) (*models.TicketType, error) {
 	var price pgtype.Numeric
 	if err := price.Scan(t.Price.String()); err != nil {
 		return nil, err
@@ -47,7 +54,7 @@ func (repo *ticketRepository) Delete(id int64) error {
 	return nil
 }
 
-func (repo *ticketRepository) UpdateTicketQuantityByID(ctx context.Context, id int64, newQuantity int32) (*ticket.TicketType, error) {
+func (repo *ticketRepository) UpdateTicketQuantityByID(ctx context.Context, id int64, newQuantity int32) (*models.TicketType, error) {
 	ticket, err := repo.queries.UpdateTicketQuantityByID(ctx, sqlc_repository.UpdateTicketQuantityByIDParams{
 		ID:                id,
 		AvailableQuantity: newQuantity,
@@ -58,7 +65,7 @@ func (repo *ticketRepository) UpdateTicketQuantityByID(ctx context.Context, id i
 	return repo.fromSqlcTicket(&ticket), nil
 }
 
-func (repo *ticketRepository) Get(ctx context.Context, id int64) (*ticket.TicketType, error) {
+func (repo *ticketRepository) Get(ctx context.Context, id int64) (*models.TicketType, error) {
 	ticketWithEvent, err := repo.queries.GetTicketByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -66,16 +73,16 @@ func (repo *ticketRepository) Get(ctx context.Context, id int64) (*ticket.Ticket
 	return repo.fromSqlcTicket(&ticketWithEvent.TicketType), nil
 }
 
-func (repo *ticketRepository) GetMany(filter any) ([]*ticket.TicketType, error) {
+func (repo *ticketRepository) GetMany(filter any) ([]*models.TicketType, error) {
 	return nil, nil
 }
 
-func (repo *ticketRepository) fromSqlcTicket(t *sqlc_repository.TicketType) *ticket.TicketType {
+func (repo *ticketRepository) fromSqlcTicket(t *sqlc_repository.TicketType) *models.TicketType {
 	var priceStr string
 	_ = t.Price.Scan(&priceStr)
 	moneyType, _ := money.NewMoney(priceStr)
 
-	ticket := &ticket.TicketType{
+	ticket := &models.TicketType{
 		ID:                t.ID,
 		Name:              t.Name,
 		Description:       t.Description,

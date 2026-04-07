@@ -6,6 +6,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"log/slog"
+	"ticket-booking/internal/auth/models"
+	"ticket-booking/internal/repository"
 	"ticket-booking/internal/user"
 
 	"golang.org/x/crypto/bcrypt"
@@ -17,17 +19,17 @@ func hash(token string) string {
 }
 
 type Service interface {
-	Login(ctx context.Context, email string, password string) (*JWTTokens, error)
+	Login(ctx context.Context, email string, password string) (*models.JWTTokens, error)
 	ParseToken(token string) (*Claims, error)
-	GetTokenByUserID(ctx context.Context, userID int64) (*RefreshToken, error)
-	UpdateTokenByUserID(ctx context.Context, newToken *RefreshToken) (*RefreshToken, error)
-	GenerateTokenPair(userID int64, role string) (*JWTTokens, error)
+	GetTokenByUserID(ctx context.Context, userID int64) (*models.RefreshToken, error)
+	UpdateTokenByUserID(ctx context.Context, newToken *models.RefreshToken) (*models.RefreshToken, error)
+	GenerateTokenPair(userID int64, role string) (*models.JWTTokens, error)
 	GenerateAccessToken(userID int64, role string) (string, error)
 	GenerateRefreshToken(userID int64, role string) (string, error)
-	GetTokenByHash(ctx context.Context, token string) (*RefreshToken, error)
+	GetTokenByHash(ctx context.Context, token string) (*models.RefreshToken, error)
 }
 
-func NewService(repo Repository, jwt *JWTManager, userService user.Service, logger *slog.Logger) Service {
+func NewService(repo repository.AuthRepository, jwt *JWTManager, userService user.Service, logger *slog.Logger) Service {
 	return &authService{
 		Repo:        repo,
 		jwt:         jwt,
@@ -37,7 +39,7 @@ func NewService(repo Repository, jwt *JWTManager, userService user.Service, logg
 }
 
 type authService struct {
-	Repo        Repository
+	Repo        repository.AuthRepository
 	jwt         *JWTManager
 	userServise user.Service
 	logger      *slog.Logger
@@ -51,7 +53,7 @@ func (s *authService) GenerateRefreshToken(userID int64, role string) (string, e
 	return s.jwt.GenerateRefreshToken(userID, role)
 }
 
-func (s *authService) Login(ctx context.Context, email string, password string) (*JWTTokens, error) {
+func (s *authService) Login(ctx context.Context, email string, password string) (*models.JWTTokens, error) {
 	user, err := s.userServise.GetUserAuthByEmail(ctx, email)
 	if err != nil {
 		return nil, err
@@ -72,7 +74,7 @@ func (s *authService) Login(ctx context.Context, email string, password string) 
 
 	_, errCreated := s.createOrUpdate(
 		ctx,
-		&RefreshToken{
+		&models.RefreshToken{
 			UserID:    user.ID,
 			ExpiresAt: claimsRefresh.ExpiresAt.Time,
 			Revoked:   false,
@@ -89,7 +91,7 @@ func (s *authService) Login(ctx context.Context, email string, password string) 
 
 var RefreshTokenDuplicationError = errors.New("Duplication error")
 
-func (s *authService) createOrUpdate(ctx context.Context, refreshToken *RefreshToken) (*RefreshToken, error) {
+func (s *authService) createOrUpdate(ctx context.Context, refreshToken *models.RefreshToken) (*models.RefreshToken, error) {
 
 	_, errGet := s.Repo.GetTokenByUserID(ctx, refreshToken.UserID)
 
@@ -101,7 +103,7 @@ func (s *authService) createOrUpdate(ctx context.Context, refreshToken *RefreshT
 	return s.Repo.UpdateTokenByUserID(ctx, refreshToken)
 }
 
-func (s *authService) GenerateTokenPair(userID int64, role string) (*JWTTokens, error) {
+func (s *authService) GenerateTokenPair(userID int64, role string) (*models.JWTTokens, error) {
 	return s.jwt.GenerateTokenPair(userID, role)
 }
 
@@ -130,14 +132,14 @@ func (s *authService) ParseToken(token string) (*Claims, error) {
 	return s.jwt.Parse(token)
 }
 
-func (s *authService) GetTokenByUserID(ctx context.Context, userID int64) (*RefreshToken, error) {
+func (s *authService) GetTokenByUserID(ctx context.Context, userID int64) (*models.RefreshToken, error) {
 	return s.Repo.GetTokenByUserID(ctx, userID)
 }
 
-func (s *authService) GetTokenByHash(ctx context.Context, tokenHash string) (*RefreshToken, error) {
+func (s *authService) GetTokenByHash(ctx context.Context, tokenHash string) (*models.RefreshToken, error) {
 	return s.Repo.GetTokenByHash(ctx, tokenHash)
 }
 
-func (s *authService) UpdateTokenByUserID(ctx context.Context, newToken *RefreshToken) (*RefreshToken, error) {
+func (s *authService) UpdateTokenByUserID(ctx context.Context, newToken *models.RefreshToken) (*models.RefreshToken, error) {
 	return s.Repo.UpdateTokenByUserID(ctx, newToken)
 }

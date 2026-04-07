@@ -1,5 +1,5 @@
 package payment
 
-func (payment *Payment) pay() {
+// func (payment *models.Payment) pay() {
 
-}
+// }

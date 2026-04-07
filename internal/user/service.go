@@ -4,23 +4,25 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"ticket-booking/internal/repository"
+	"ticket-booking/internal/user/models"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
-	Get(id int64) (*User, error)
-	GetMany(filters any) []*User
-	Create(ctx context.Context, user *CreateUserRequest) (*User, error)
-	GetUserAuthByEmail(ctx context.Context, email string) (*UserAuth, error)
+	Get(id int64) (*models.User, error)
+	GetMany(filters any) []*models.User
+	Create(ctx context.Context, user *models.CreateUserRequest) (*models.User, error)
+	GetUserAuthByEmail(ctx context.Context, email string) (*models.UserAuth, error)
 }
 
-func NewService(repo Repository, logger *slog.Logger) Service {
+func NewService(repo repository.UserRepository, logger *slog.Logger) Service {
 	return &userService{Repo: repo, logger: logger}
 }
 
 type userService struct {
-	Repo   Repository
+	Repo   repository.UserRepository
 	logger *slog.Logger
 }
 
@@ -29,7 +31,7 @@ func (s *userService) hashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func (s *userService) Get(id int64) (*User, error) {
+func (s *userService) Get(id int64) (*models.User, error) {
 	value, err := s.Repo.Get(id)
 	if err != nil {
 		return nil, err
@@ -37,26 +39,26 @@ func (s *userService) Get(id int64) (*User, error) {
 	return value, nil
 }
 
-func (s *userService) GetMany(filters any) []*User {
+func (s *userService) GetMany(filters any) []*models.User {
 	return nil
 }
 
-func (s *userService) GetUser() User {
-	return User{
+func (s *userService) GetUser() models.User {
+	return models.User{
 		ID:    1,
 		Name:  "Name",
 		Email: "Email",
 	}
 }
 
-func (s *userService) Create(ctx context.Context, user *CreateUserRequest) (*User, error) {
+func (s *userService) Create(ctx context.Context, user *models.CreateUserRequest) (*models.User, error) {
 	hashedPassword, err := s.hashPassword(user.Password)
 
 	if err != nil {
 		return nil, err
 	}
 
-	u := &CreateUserRequest{
+	u := &models.CreateUserRequest{
 		Name:     user.Name,
 		Email:    user.Email,
 		Password: hashedPassword,
@@ -72,7 +74,7 @@ func (s *userService) Create(ctx context.Context, user *CreateUserRequest) (*Use
 	return value, nil
 }
 
-func (s *userService) GetUserAuthByEmail(ctx context.Context, email string) (*UserAuth, error) {
+func (s *userService) GetUserAuthByEmail(ctx context.Context, email string) (*models.UserAuth, error) {
 	value, err := s.Repo.GetByEmail(ctx, email)
 
 	if err != nil {

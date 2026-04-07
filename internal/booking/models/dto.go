@@ -1,4 +1,4 @@
-package booking
+package models
 
 type CreateBookingRequest struct {
 	EventID int64                  `json:"event_id"`

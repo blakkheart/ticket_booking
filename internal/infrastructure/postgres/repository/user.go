@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	sqlc_repository "ticket-booking/internal/db/sqlc"
 	"ticket-booking/internal/user"
+	"ticket-booking/internal/user/models"
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -23,14 +24,14 @@ func NewUserRepository(db *pgxpool.Pool, logger *slog.Logger) *accountRepository
 	}
 }
 
-func (repo *accountRepository) Create(ctx context.Context, u *user.CreateUserRequest) (*user.User, error) {
+func (repo *accountRepository) Create(ctx context.Context, u *models.CreateUserRequest) (*models.User, error) {
 	account, err := repo.queries.CreateAccount(
 		ctx,
 		sqlc_repository.CreateAccountParams{
 			Name:     u.Name,
 			Email:    u.Email,
 			Password: u.Password,
-			Role:     user.Member,
+			Role:     models.Member,
 		},
 	)
 
@@ -50,15 +51,15 @@ func (repo *accountRepository) Delete(id int64) error {
 	return nil
 }
 
-func (repo *accountRepository) Get(id int64) (*user.User, error) {
+func (repo *accountRepository) Get(id int64) (*models.User, error) {
 	return nil, nil
 }
 
-func (repo *accountRepository) GetMany(filter any) ([]*user.User, error) {
+func (repo *accountRepository) GetMany(filter any) ([]*models.User, error) {
 	return nil, nil
 }
 
-func (repo *accountRepository) GetByEmail(ctx context.Context, email string) (*user.UserAuth, error) {
+func (repo *accountRepository) GetByEmail(ctx context.Context, email string) (*models.UserAuth, error) {
 	acc, err := repo.queries.GetAccountByEmail(ctx, email)
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -66,7 +67,7 @@ func (repo *accountRepository) GetByEmail(ctx context.Context, email string) (*u
 			return nil, err
 		}
 	}
-	return &user.UserAuth{
+	return &models.UserAuth{
 		ID:           acc.ID,
 		Email:        acc.Email,
 		PasswordHash: acc.Password,
@@ -75,8 +76,8 @@ func (repo *accountRepository) GetByEmail(ctx context.Context, email string) (*u
 
 }
 
-func (repo *accountRepository) fromSqlcAccount(a *sqlc_repository.Account) *user.User {
-	account := &user.User{
+func (repo *accountRepository) fromSqlcAccount(a *sqlc_repository.Account) *models.User {
+	account := &models.User{
 		ID:    a.ID,
 		Email: a.Email,
 		Name:  a.Name,

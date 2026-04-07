@@ -8,7 +8,7 @@ import (
 
 	"ticket-booking/internal/auth"
 	"ticket-booking/internal/httpx"
-	"ticket-booking/internal/user"
+	"ticket-booking/internal/user/models"
 
 	"github.com/casbin/casbin/v2"
 )
@@ -19,7 +19,7 @@ type userInfo struct {
 }
 
 func getUserInfo(r *http.Request, jwt *auth.JWTManager) (*userInfo, error) {
-	role := string(user.Anonymous)
+	role := string(models.Anonymous)
 	var userID int64
 
 	token, tokenErr := auth.GetTokenFromPayload(r)

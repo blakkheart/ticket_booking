@@ -1,4 +1,4 @@
-package bookingitems
+package models
 
 import "ticket-booking/internal/money"
 

@@ -4,24 +4,26 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	bookingitems "ticket-booking/internal/booking_items"
-	"ticket-booking/internal/event"
+	"ticket-booking/internal/booking/models"
+	biModels "ticket-booking/internal/booking_items/models"
 	"ticket-booking/internal/money"
-	"ticket-booking/internal/ticket"
+	"ticket-booking/internal/repository"
+	"ticket-booking/internal/uow"
 	"time"
 )
 
 type Service interface {
-	Get(id int64) (*Booking, error)
-	GetMany(filters any) []*Booking
-	Create(ctx context.Context, b *CreateBookingRequest, userID int64) (*Booking, error)
+	Get(id int64) (*models.Booking, error)
+	GetMany(filters any) []*models.Booking
+	Create(ctx context.Context, b *models.CreateBookingRequest, userID int64) (*models.Booking, error)
 }
 
 func NewService(
-	bookingRepo Repository,
-	eventRepo event.Repository,
-	bookingItemsRepo bookingitems.Repository,
-	ticketRepo ticket.Repository,
+	bookingRepo repository.BookingRepository,
+	eventRepo repository.EventRepository,
+	bookingItemsRepo repository.BookingItemsRepository,
+	ticketRepo repository.TicketRepository,
+	uowManager uow.UnitOfWorkManager,
 	logger *slog.Logger,
 ) Service {
 	return &bookingService{
@@ -29,53 +31,76 @@ func NewService(
 		eventRepo:        eventRepo,
 		bookingItemsRepo: bookingItemsRepo,
 		ticketRepo:       ticketRepo,
+		uowManager:       uowManager,
 		logger:           logger,
 	}
 }
 
 type bookingService struct {
-	bookingRepo      Repository
-	eventRepo        event.Repository
-	bookingItemsRepo bookingitems.Repository
-	ticketRepo       ticket.Repository
-	logger           *slog.Logger
+	bookingRepo      repository.BookingRepository
+	eventRepo        repository.EventRepository
+	bookingItemsRepo repository.BookingItemsRepository
+	ticketRepo       repository.TicketRepository
+	uowManager       uow.UnitOfWorkManager
+
+	logger *slog.Logger
 }
 
-func (service *bookingService) Get(id int64) (*Booking, error) {
+func (service *bookingService) Get(id int64) (*models.Booking, error) {
 	booking, err := service.bookingRepo.Get(id)
 	return booking, err
 }
 
-func (service *bookingService) GetMany(filters any) []*Booking {
+func (service *bookingService) GetMany(filters any) []*models.Booking {
 	return nil
 }
 
-func (service *bookingService) Create(ctx context.Context, b *CreateBookingRequest, userID int64) (*Booking, error) {
+func (service *bookingService) Create(ctx context.Context, b *models.CreateBookingRequest, userID int64) (res *models.Booking, err error) {
+
+	uowM, err := service.uowManager.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if err != nil {
+			service.logger.Debug("Transaction rollback")
+			_ = uowM.Rollback(ctx)
+			return
+		}
+		service.logger.Debug("Transaction commit")
+		err = uowM.Commit(ctx)
+	}()
+
+	bookingRepo := uowM.BookingRepo()
+	ticketRepo := uowM.TicketRepo()
+	bookingItemsRepo := uowM.BookingItemsRepo()
 
 	expiresAfter := time.Now().Add(15 * time.Minute)
 
-	bookingIn := BookingIn{
+	bookingIn := models.BookingIn{
 		AccountID: userID,
-		Status:    Pending,
+		Status:    models.Pending,
 		ExpiresAt: &expiresAfter,
 		PaidAt:    nil,
 	}
-	bookingCreated, err := service.bookingRepo.Create(ctx, &bookingIn)
+	bookingCreated, err := bookingRepo.Create(ctx, &bookingIn)
 
 	if err != nil {
 		return nil, errors.New("Cannot create booking")
 	}
 
-	totalPrice, errMoney := money.NewMoney("0")
-	if errMoney != nil {
-		return nil, errMoney
+	totalPrice, err := money.NewMoney("0")
+	if err != nil {
+		return nil, err
 	}
 
 	for _, bItem := range b.Items {
 
-		ticketType, errTicket := service.ticketRepo.Get(ctx, bItem.TicketTypeID)
+		ticketType, err := ticketRepo.Get(ctx, bItem.TicketTypeID)
 
-		if errTicket != nil {
+		if err != nil {
+			service.logger.Error("ticket type doesn't exist: %w", err)
 			return nil, errors.New("TicketType dosent exist")
 		}
 		if ticketType.EventID != b.EventID {
@@ -88,19 +113,19 @@ func (service *bookingService) Create(ctx context.Context, b *CreateBookingReque
 
 		totalPrice = totalPrice.Add(&ticketType.Price)
 
-		bookingItemIn := bookingitems.BookingItemIn{
+		bookingItemIn := biModels.BookingItemIn{
 			BookingID:      bookingCreated.ID,
 			TicketTypeID:   bItem.TicketTypeID,
 			Quantity:       bItem.Quantity,
 			PriceAtBooking: ticketType.Price,
 		}
 
-		service.ticketRepo.UpdateTicketQuantityByID(ctx, bItem.TicketTypeID, ticketType.AvailableQuantity-bItem.Quantity)
+		ticketRepo.UpdateTicketQuantityByID(ctx, bItem.TicketTypeID, ticketType.AvailableQuantity-bItem.Quantity)
 
-		_, errC := service.bookingItemsRepo.Create(ctx, &bookingItemIn)
-		if errC != nil {
-			if errors.Is(errC, BookingItemsAlreadyExists) {
-				return nil, errC
+		_, err = bookingItemsRepo.Create(ctx, &bookingItemIn)
+		if err != nil {
+			if errors.Is(err, BookingItemsAlreadyExists) {
+				return nil, err
 			}
 			return nil, errors.New("Cannot create bookingItem")
 		}
