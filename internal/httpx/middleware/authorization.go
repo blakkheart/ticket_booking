@@ -13,8 +13,14 @@ import (
 	"github.com/casbin/casbin/v2"
 )
 
-func getRole(r *http.Request, jwt *auth.JWTManager) (string, error) {
+type userInfo struct {
+	Role   string
+	UserID *int64
+}
+
+func getUserInfo(r *http.Request, jwt *auth.JWTManager) (*userInfo, error) {
 	role := string(user.Anonymous)
+	var userID int64
 
 	token, tokenErr := auth.GetTokenFromPayload(r)
 
@@ -26,12 +32,13 @@ func getRole(r *http.Request, jwt *auth.JWTManager) (string, error) {
 
 		if err != nil {
 			slog.Error(err.Error())
-			return "", errors.New("Invalid token")
+			return nil, errors.New("Invalid token")
 		} else {
 			role = claims.Role
+			userID = claims.UserID
 		}
 	}
-	return role, nil
+	return &userInfo{UserID: &userID, Role: role}, nil
 }
 
 func Authorizer(e *casbin.Enforcer, jwt *auth.JWTManager) Middleware {
@@ -47,16 +54,19 @@ func Authorizer(e *casbin.Enforcer, jwt *auth.JWTManager) Middleware {
 				reqID = "UNKNOWN"
 			}
 
-			role, err := getRole(r, jwt)
+			userInfo, err := getUserInfo(r, jwt)
 
 			if err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 
-			slog.Debug("Enforcing auth", "requestID", reqID, "role", role, "path", r.URL.Path, "method", r.Method)
+			ctx := httpx.WithUserID(r.Context(), userInfo.UserID)
+			r = r.WithContext(ctx)
 
-			res, err := e.Enforce(role, r.URL.Path, r.Method)
+			slog.Debug("Enforcing auth", "requestID", reqID, "role", userInfo.Role, "path", r.URL.Path, "method", r.Method)
+
+			res, err := e.Enforce(userInfo.Role, r.URL.Path, r.Method)
 
 			if err != nil {
 				log.Printf("middleware auth - enforce error: %v", err)

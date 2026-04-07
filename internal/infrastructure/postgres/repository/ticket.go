@@ -47,6 +47,17 @@ func (repo *ticketRepository) Delete(id int64) error {
 	return nil
 }
 
+func (repo *ticketRepository) UpdateTicketQuantityByID(ctx context.Context, id int64, newQuantity int32) (*ticket.TicketType, error) {
+	ticket, err := repo.queries.UpdateTicketQuantityByID(ctx, sqlc_repository.UpdateTicketQuantityByIDParams{
+		ID:                id,
+		AvailableQuantity: newQuantity,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return repo.fromSqlcTicket(&ticket), nil
+}
+
 func (repo *ticketRepository) Get(ctx context.Context, id int64) (*ticket.TicketType, error) {
 	ticketWithEvent, err := repo.queries.GetTicketByID(ctx, id)
 	if err != nil {

@@ -11,3 +11,10 @@ SELECT sqlc.embed(ticket_type), sqlc.embed(event)
 FROM ticket_type
 JOIN event ON event.id == ticket_type.event_id
 WHERE ticket_type.id = $1;
+
+
+-- name: UpdateTicketQuantityByID :one
+UPDATE ticket_type
+SET available_quantity = $2
+WHERE id = $1 AND available_quantity >= $2
+RETURNING *;

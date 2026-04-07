@@ -22,7 +22,7 @@ content-type: application/json
 
 POST http://127.0.0.1:8080/api/booking/create
 content-type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsInJvbGUiOiJtZW1iZXIiLCJpc3MiOiJ0ZXN0IiwiZXhwIjoxNzc1MjQ0NzUzLCJpYXQiOjE3NzUxNTgzNTN9.Pu2SnRuVxTpIf-Gax58xa-OPsarvvcwlctcCDwjSDFM
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsInJvbGUiOiJtZW1iZXIiLCJpc3MiOiJ0ZXN0IiwiZXhwIjoxNzc1NTU5MzU4LCJpYXQiOjE3NzU0NzI5NTh9.v2ua7YyCVhlbmhL5OM2yz5sdbgJliUDouWRoFTpBKHg
 
 {
     "event_id": 123,
