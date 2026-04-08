@@ -26,6 +26,12 @@ sql:
               import: "github.com/google/uuid"
               type: "UUID"
           - column: "account.role"
-            go_type: "ticket-booking/internal/user/models.Role"
+            go_type: 
+              import: "ticket-booking/internal/user/models"
+              package: "usermodels"
+              type: "Role"
           - column: "booking.status"
-            go_type: "ticket-booking/internal/booking/models.BookingStatus"
+            go_type: 
+              import: "ticket-booking/internal/booking/models"
+              package: "bookingmodels"
+              type: "BookingStatus"
