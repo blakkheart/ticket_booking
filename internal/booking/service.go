@@ -84,7 +84,7 @@ func (service *bookingService) Create(ctx context.Context, b *models.CreateBooki
 		ExpiresAt: &expiresAfter,
 		PaidAt:    nil,
 	}
-	bookingCreated, err := bookingRepo.Create(ctx, &bookingIn)
+	res, err = bookingRepo.Create(ctx, &bookingIn)
 
 	if err != nil {
 		return nil, errors.New("Cannot create booking")
@@ -114,7 +114,7 @@ func (service *bookingService) Create(ctx context.Context, b *models.CreateBooki
 		totalPrice = totalPrice.Add(&ticketType.Price)
 
 		bookingItemIn := biModels.BookingItemIn{
-			BookingID:      bookingCreated.ID,
+			BookingID:      res.ID,
 			TicketTypeID:   bItem.TicketTypeID,
 			Quantity:       bItem.Quantity,
 			PriceAtBooking: ticketType.Price,
@@ -131,7 +131,7 @@ func (service *bookingService) Create(ctx context.Context, b *models.CreateBooki
 		}
 	}
 
-	bookingCreated.TotalPrice = totalPrice
+	res.TotalPrice = totalPrice
 
-	return bookingCreated, nil
+	return res, nil
 }
