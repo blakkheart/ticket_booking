@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
-	App    AppConfig    `mapstructure:"app"`
-	DB     DBConfig     `mapstructure:"db"`
-	Server ServerConfig `mapstructure:"server"`
-	Auth   AuthConfig   `mapstructure:"auth"`
+	App     AppConfig     `mapstructure:"app"`
+	DB      DBConfig      `mapstructure:"db"`
+	Server  ServerConfig  `mapstructure:"server"`
+	Auth    AuthConfig    `mapstructure:"auth"`
+	Payment PaymentConfig `mapstructure:"payment"`
 }
 
 type AppConfig struct {
@@ -59,6 +60,9 @@ func bindEnvs(v *viper.Viper) {
 
 		"auth.secret_key",
 		"auth.token_duration",
+
+		"payment.provider",
+		"payment.secret",
 	}
 
 	for _, key := range keys {

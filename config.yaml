@@ -13,3 +13,7 @@ server:
 auth:
   secret_key: supersecret
   token_duration: 24h
+
+payment:
+  provider: mock # stripe etc
+  secret: "test_secret"
