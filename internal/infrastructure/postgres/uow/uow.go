@@ -2,6 +2,7 @@ package postgresuow
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	sqlc_repository "ticket-booking/internal/db/sqlc"
 	"ticket-booking/internal/infrastructure/postgres/repository"
@@ -49,5 +50,17 @@ func (u *uow) Commit(ctx context.Context) error {
 }
 
 func (u *uow) Rollback(ctx context.Context) error {
-	return u.tx.Rollback(ctx)
+	err := u.tx.Rollback(ctx)
+	if err != nil {
+		if errors.Is(err, pgx.ErrTxClosed) {
+			slog.Debug("rollback skipped. tx already closed")
+			return nil
+		}
+
+		slog.Error("rollback failed", "error", err)
+		return err
+	}
+
+	slog.Debug("transaction rolled back")
+	return nil
 }

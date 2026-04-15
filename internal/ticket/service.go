@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"ticket-booking/internal/repository"
 	"ticket-booking/internal/ticket/models"
+	"ticket-booking/internal/uow"
 )
 
 type Service interface {
@@ -42,4 +43,21 @@ func (service *ticketService) Create(ctx context.Context, t *models.TicketTypeIn
 	}
 	return ticket, nil
 
+}
+
+func (service *ticketService) Reserve(ctx context.Context,
+	uow uow.UnitOfWork,
+	ticketTypeID int64,
+	qty int,
+) (*models.TicketType, error) {
+
+	// repo := uow.TicketRepo()
+
+	// ticket, err := repo.Reserve(ctx, ticketTypeID, qty)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// return ticket, nil
+	return nil, nil
 }

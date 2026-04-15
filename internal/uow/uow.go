@@ -16,4 +16,5 @@ type UnitOfWork interface {
 
 type UnitOfWorkManager interface {
 	Begin(ctx context.Context) (UnitOfWork, error)
+	Do(ctx context.Context, fn func(uow UnitOfWork) error) error
 }

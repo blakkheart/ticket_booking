@@ -28,3 +28,17 @@ func (m *uowManager) Begin(ctx context.Context) (uowmodel.UnitOfWork, error) {
 	}
 	return newUow(tx, m.logger), nil
 }
+
+func (m *uowManager) Do(ctx context.Context, fn func(uow uowmodel.UnitOfWork) error) error {
+	uow, err := m.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	defer uow.Rollback(ctx)
+
+	if err := fn(uow); err != nil {
+		return err
+	}
+	return uow.Commit(ctx)
+}

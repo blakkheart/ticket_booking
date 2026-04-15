@@ -57,81 +57,77 @@ func (service *bookingService) GetMany(filters any) []*models.Booking {
 
 func (service *bookingService) Create(ctx context.Context, b *models.CreateBookingRequest, userID int64) (res *models.Booking, err error) {
 
-	uowM, err := service.uowManager.Begin(ctx)
-	if err != nil {
-		return nil, err
-	}
+	var result *models.Booking
 
-	defer func() {
-		if err != nil {
-			service.logger.Debug("Transaction rollback")
-			_ = uowM.Rollback(ctx)
-			return
+	err = service.uowManager.Do(ctx, func(uow uow.UnitOfWork) error {
+		bookingRepo := uow.BookingRepo()
+		ticketRepo := uow.TicketRepo()
+		bookingItemsRepo := uow.BookingItemsRepo()
+
+		expiresAfter := time.Now().Add(15 * time.Minute)
+
+		bookingIn := models.BookingIn{
+			AccountID: userID,
+			Status:    models.Pending,
+			ExpiresAt: &expiresAfter,
+			PaidAt:    nil,
 		}
-		service.logger.Debug("Transaction commit")
-		err = uowM.Commit(ctx)
-	}()
-
-	bookingRepo := uowM.BookingRepo()
-	ticketRepo := uowM.TicketRepo()
-	bookingItemsRepo := uowM.BookingItemsRepo()
-
-	expiresAfter := time.Now().Add(15 * time.Minute)
-
-	bookingIn := models.BookingIn{
-		AccountID: userID,
-		Status:    models.Pending,
-		ExpiresAt: &expiresAfter,
-		PaidAt:    nil,
-	}
-	res, err = bookingRepo.Create(ctx, &bookingIn)
-
-	if err != nil {
-		return nil, errors.New("Cannot create booking")
-	}
-
-	totalPrice, err := money.NewMoney("0")
-	if err != nil {
-		return nil, err
-	}
-
-	for _, bItem := range b.Items {
-
-		ticketType, err := ticketRepo.Get(ctx, bItem.TicketTypeID)
+		res, err = bookingRepo.Create(ctx, &bookingIn)
 
 		if err != nil {
-			service.logger.Error("ticket type doesn't exist: %w", err)
-			return nil, errors.New("TicketType dosent exist")
-		}
-		if ticketType.EventID != b.EventID {
-			return nil, errors.New("TicketType dosent match eventID")
+			return errors.New("Cannot create booking")
 		}
 
-		if ticketType.AvailableQuantity < bItem.Quantity {
-			return nil, errors.New("Avaliable ticket quantity is too low")
-		}
-
-		totalPrice = totalPrice.Add(&ticketType.Price)
-
-		bookingItemIn := biModels.BookingItemIn{
-			BookingID:      res.ID,
-			TicketTypeID:   bItem.TicketTypeID,
-			Quantity:       bItem.Quantity,
-			PriceAtBooking: ticketType.Price,
-		}
-
-		ticketRepo.UpdateTicketQuantityByID(ctx, bItem.TicketTypeID, ticketType.AvailableQuantity-bItem.Quantity)
-
-		_, err = bookingItemsRepo.Create(ctx, &bookingItemIn)
+		totalPrice, err := money.NewMoney("0")
 		if err != nil {
-			if errors.Is(err, BookingItemsAlreadyExists) {
-				return nil, err
+			return err
+		}
+
+		for _, bItem := range b.Items {
+
+			ticketType, err := ticketRepo.Get(ctx, bItem.TicketTypeID)
+
+			if err != nil {
+				service.logger.Error("ticket type doesn't exist: %w", err)
+				return errors.New("TicketType dosent exist")
 			}
-			return nil, errors.New("Cannot create bookingItem")
+			if ticketType.EventID != b.EventID {
+				return errors.New("TicketType dosent match eventID")
+			}
+
+			if ticketType.AvailableQuantity < bItem.Quantity {
+				return errors.New("Avaliable ticket quantity is too low")
+			}
+
+			totalPrice = totalPrice.Add(&ticketType.Price)
+
+			bookingItemIn := biModels.BookingItemIn{
+				BookingID:      res.ID,
+				TicketTypeID:   bItem.TicketTypeID,
+				Quantity:       bItem.Quantity,
+				PriceAtBooking: ticketType.Price,
+			}
+
+			ticketRepo.UpdateTicketQuantityByID(ctx, bItem.TicketTypeID, ticketType.AvailableQuantity-bItem.Quantity)
+
+			_, err = bookingItemsRepo.Create(ctx, &bookingItemIn)
+			if err != nil {
+				if errors.Is(err, BookingItemsAlreadyExists) {
+					return err
+				}
+				return errors.New("Cannot create bookingItem")
+			}
 		}
+
+		res.TotalPrice = totalPrice
+
+		result = res
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
-	res.TotalPrice = totalPrice
-
-	return res, nil
+	return result, nil
 }
