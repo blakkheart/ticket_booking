@@ -2,6 +2,7 @@ package ticket
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"ticket-booking/internal/repository"
 	"ticket-booking/internal/ticket/models"
@@ -12,6 +13,12 @@ type Service interface {
 	Get(id int64) (*models.TicketType, error)
 	GetMany(filters any) []*models.TicketType
 	Create(ctx context.Context, t *models.TicketTypeIn) (*models.TicketType, error)
+	Reserve(ctx context.Context,
+		uow uow.UnitOfWork,
+		ticketTypeID int64,
+		quantity int32,
+		eventID int64,
+	) (*models.TicketType, error)
 }
 
 func NewService(repo repository.TicketRepository, logger *slog.Logger) Service {
@@ -48,16 +55,29 @@ func (service *ticketService) Create(ctx context.Context, t *models.TicketTypeIn
 func (service *ticketService) Reserve(ctx context.Context,
 	uow uow.UnitOfWork,
 	ticketTypeID int64,
-	qty int,
+	quantity int32,
+	eventID int64,
 ) (*models.TicketType, error) {
 
-	// repo := uow.TicketRepo()
+	repo := uow.TicketRepo()
+	ticketType, err := repo.Get(ctx, ticketTypeID)
 
-	// ticket, err := repo.Reserve(ctx, ticketTypeID, qty)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		service.logger.Error("ticket type doesn't exist: %w", err)
+		return nil, errors.New("TicketType dosent exist")
+	}
+	if ticketType.EventID != eventID {
+		return nil, errors.New("TicketType dosent match eventID")
+	}
 
-	// return ticket, nil
-	return nil, nil
+	if ticketType.AvailableQuantity < quantity {
+		return nil, errors.New("Avaliable ticket quantity is too low")
+	}
+
+	// totalPrice = totalPrice.Add(&ticketType.Price)
+	ticket, err := repo.UpdateTicketQuantityByID(ctx, ticketTypeID, ticketType.AvailableQuantity-quantity)
+	if err != nil {
+		return nil, err
+	}
+	return ticket, nil
 }

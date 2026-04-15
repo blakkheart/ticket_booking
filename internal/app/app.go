@@ -43,7 +43,7 @@ func NewApp(pool *pgxpool.Pool, jwt *auth.JWTManager, logger *slog.Logger) *App 
 		bookingRepo,
 		eventRepo,
 		bookingItemsRepo,
-		ticketRepo,
+		ticketService,
 		uowManager,
 		logger,
 	)
