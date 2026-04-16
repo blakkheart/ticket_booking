@@ -48,7 +48,7 @@ type bookingService struct {
 }
 
 func (service *bookingService) Get(id int64) (*models.Booking, error) {
-	booking, err := service.bookingRepo.Get(id)
+	booking, err := service.bookingRepo.Get(context.TODO(), id)
 	return booking, err
 }
 
@@ -68,7 +68,7 @@ func (service *bookingService) Create(ctx context.Context, b *models.CreateBooki
 
 		bookingIn := models.BookingIn{
 			AccountID: userID,
-			Status:    models.Pending,
+			Status:    models.StatusPending,
 			ExpiresAt: &expiresAfter,
 			PaidAt:    nil,
 		}

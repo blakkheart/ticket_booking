@@ -40,11 +40,11 @@ func newUow(tx pgx.Tx, logger *slog.Logger) *uow {
 		tx:      tx,
 		queries: q,
 
-		bookingRepo:      repository.NewBookingRepositoryFromQueries(q, logger),
-		ticketRepo:       repository.NewTicketRepositoryFromQueries(q, logger),
-		bookingItemsRepo: repository.NewBookingItemsRepositoryFromQueries(q, logger),
-		// paymentIntentRepo: repository.NewPaymentIntentRepositoryFromQueries(q, logger),
-		// paymentRepo:       repository.NewPaymentRepositoryFromQueries(q, logger),
+		bookingRepo:       repository.NewBookingRepositoryFromQueries(q, logger),
+		ticketRepo:        repository.NewTicketRepositoryFromQueries(q, logger),
+		bookingItemsRepo:  repository.NewBookingItemsRepositoryFromQueries(q, logger),
+		paymentIntentRepo: repository.NewPaymentIntentRepositoryFromQueries(q, logger),
+		paymentRepo:       repository.NewPaymentRepositoryFromQueries(q, logger),
 	}
 }
 

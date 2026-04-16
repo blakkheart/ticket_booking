@@ -42,16 +42,20 @@ func (repo *bookingRepository) Create(ctx context.Context, b *models.BookingIn) 
 	return repo.fromSqlcBooking(&booking), err
 }
 
-func (repo *bookingRepository) Delete(id int64) error {
+func (repo *bookingRepository) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (repo *bookingRepository) Get(id int64) (*models.Booking, error) {
+func (repo *bookingRepository) Get(ctx context.Context, id int64) (*models.Booking, error) {
 	return nil, nil
 }
 
-func (repo *bookingRepository) GetMany(filter any) ([]*models.Booking, error) {
+func (repo *bookingRepository) GetMany(ctx context.Context, filter any) ([]*models.Booking, error) {
 	return nil, nil
+}
+
+func (repo *bookingRepository) Update(ctx context.Context, booking *models.Booking) error {
+	return nil
 }
 
 func (repo *bookingRepository) fromSqlcBooking(b *sqlc_repository.Booking) *models.Booking {

@@ -8,10 +8,11 @@ import (
 type BookingStatus string
 
 const (
-	Pending   BookingStatus = "pending"
-	Confirmed BookingStatus = "confirmed"
-	Cancelled BookingStatus = "cancelled"
-	Expired   BookingStatus = "expired"
+	StatusPending         BookingStatus = "pending"
+	StatusAwaitingPayment BookingStatus = "awaiting_payment"
+	StatusPaid            BookingStatus = "paid"
+	StatusCancelled       BookingStatus = "cancelled"
+	StatusExpired         BookingStatus = "expired"
 )
 
 type Booking struct {

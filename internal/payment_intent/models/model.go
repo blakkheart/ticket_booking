@@ -16,7 +16,7 @@ const (
 )
 
 type PaymentIntent struct {
-	ID        int64
+	ID        string
 	BookingID int64
 	Amount    money.Money
 	Currency  string

@@ -43,7 +43,7 @@ func (s *Service) HandleCallback(ctx context.Context, provider PaymentProvider, 
 		return err
 	}
 
-	payment, err := s.repo.GetByID(ctx, data.PaymentID)
+	payment, err := s.repo.Get(ctx, data.PaymentID)
 	if err != nil {
 		return err
 	}
