@@ -63,7 +63,7 @@ func (service *ticketService) Reserve(ctx context.Context,
 	ticketType, err := repo.Get(ctx, ticketTypeID)
 
 	if err != nil {
-		service.logger.Error("ticket type doesn't exist: %w", err)
+		service.logger.Error("ticket type doesn't exist", "error", err)
 		return nil, errors.New("TicketType dosent exist")
 	}
 	if ticketType.EventID != eventID {
@@ -74,7 +74,6 @@ func (service *ticketService) Reserve(ctx context.Context,
 		return nil, errors.New("Avaliable ticket quantity is too low")
 	}
 
-	// totalPrice = totalPrice.Add(&ticketType.Price)
 	ticket, err := repo.UpdateTicketQuantityByID(ctx, ticketTypeID, ticketType.AvailableQuantity-quantity)
 	if err != nil {
 		return nil, err

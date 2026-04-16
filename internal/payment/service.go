@@ -64,7 +64,7 @@ func (s *Service) CreatePayment(
 
 	payment := &models.Payment{
 		ID:        uuid.NewString(),
-		OrderID:   req.PaymentID,
+		PaymentID: req.PaymentID,
 		Amount:    req.Amount,
 		Currency:  req.Currency,
 		Status:    models.PaymentStatusPending,
