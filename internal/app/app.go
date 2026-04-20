@@ -23,7 +23,11 @@ type App struct {
 	Auth         auth.Service
 }
 
-func NewApp(pool *pgxpool.Pool, jwt *auth.JWTManager, logger *slog.Logger) *App {
+func NewApp(
+	pool *pgxpool.Pool,
+	jwt *auth.JWTManager,
+	logger *slog.Logger,
+) *App {
 	uowManager := postgresuow.NewManager(pool, logger)
 
 	userRepo := repository.NewUserRepository(pool, logger)

@@ -18,14 +18,20 @@ type authRepository struct {
 	logger  *slog.Logger
 }
 
-func NewAuthRepository(db *pgxpool.Pool, logger *slog.Logger) *authRepository {
+func NewAuthRepository(
+	db *pgxpool.Pool,
+	logger *slog.Logger,
+) *authRepository {
 	return &authRepository{
 		queries: sqlc_repository.New(db),
 		logger:  logger,
 	}
 }
 
-func (r *authRepository) Create(ctx context.Context, token *models.RefreshToken) (*models.RefreshToken, error) {
+func (r *authRepository) Create(
+	ctx context.Context,
+	token *models.RefreshToken,
+) (*models.RefreshToken, error) {
 	t, err := r.queries.CreateToken(
 		ctx,
 		sqlc_repository.CreateTokenParams{
@@ -49,7 +55,10 @@ func (r *authRepository) Create(ctx context.Context, token *models.RefreshToken)
 	return r.fromSqlcAuth(&t), err
 }
 
-func (r *authRepository) GetTokenByUserID(ctx context.Context, userID uuid.UUID) (*models.RefreshToken, error) {
+func (r *authRepository) GetTokenByUserID(
+	ctx context.Context,
+	userID uuid.UUID,
+) (*models.RefreshToken, error) {
 	token, err := r.queries.GetTokenByUserID(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -57,7 +66,10 @@ func (r *authRepository) GetTokenByUserID(ctx context.Context, userID uuid.UUID)
 	return r.fromSqlcAuth(&token), nil
 }
 
-func (r *authRepository) GetTokenByHash(ctx context.Context, tokenHash string) (*models.RefreshToken, error) {
+func (r *authRepository) GetTokenByHash(
+	ctx context.Context,
+	tokenHash string,
+) (*models.RefreshToken, error) {
 	token, err := r.queries.GetTokenByHash(ctx, tokenHash)
 	if err != nil {
 		return nil, err
@@ -65,7 +77,10 @@ func (r *authRepository) GetTokenByHash(ctx context.Context, tokenHash string) (
 	return r.fromSqlcAuth(&token), nil
 }
 
-func (r *authRepository) UpdateTokenByUserID(ctx context.Context, newToken *models.RefreshToken) (*models.RefreshToken, error) {
+func (r *authRepository) UpdateTokenByUserID(
+	ctx context.Context,
+	newToken *models.RefreshToken,
+) (*models.RefreshToken, error) {
 	token, err := r.queries.UpdateTokenByUserID(ctx, sqlc_repository.UpdateTokenByUserIDParams{
 		UserID:     newToken.UserID,
 		TokenHash:  newToken.TokenHash,
@@ -79,7 +94,9 @@ func (r *authRepository) UpdateTokenByUserID(ctx context.Context, newToken *mode
 	return r.fromSqlcAuth(&token), nil
 }
 
-func (r *authRepository) fromSqlcAuth(rt *sqlc_repository.RefreshToken) *models.RefreshToken {
+func (r *authRepository) fromSqlcAuth(
+	rt *sqlc_repository.RefreshToken,
+) *models.RefreshToken {
 	refreshToken := &models.RefreshToken{
 		UserID:     rt.UserID,
 		ExpiresAt:  rt.ExpiresAt,
