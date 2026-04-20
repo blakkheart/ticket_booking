@@ -6,6 +6,7 @@ import (
 	sqlc_repository "ticket-booking/internal/db/sqlc"
 	"ticket-booking/internal/payment_intent/models"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -34,15 +35,15 @@ func NewPaymentIntentRepositoryFromQueries(
 	}
 }
 
-func (repo *paymentIntentRepository) Create(ctx context.Context, p *models.PaymentIntent) error{
+func (repo *paymentIntentRepository) Create(ctx context.Context, p *models.PaymentIntent) error {
 	return nil
 }
 
-func (repo *paymentIntentRepository) Get(ctx context.Context, id int64) (*models.PaymentIntent, error) {
+func (repo *paymentIntentRepository) Get(ctx context.Context, id uuid.UUID) (*models.PaymentIntent, error) {
 	return nil, nil
 }
 
-func (repo *paymentIntentRepository) GetByBookingID(ctx context.Context, bookingID int64) (*models.PaymentIntent, error) {
+func (repo *paymentIntentRepository) GetByBookingID(ctx context.Context, bookingID uuid.UUID) (*models.PaymentIntent, error) {
 	return nil, nil
 }
 

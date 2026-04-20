@@ -15,8 +15,8 @@ import (
 type Service interface {
 	Create(
 		ctx context.Context,
-		bookingID int64,
-		userID int64,
+		bookingID uuid.UUID,
+		userID uuid.UUID,
 	) (*models.PaymentIntent, error)
 }
 
@@ -40,8 +40,8 @@ type paymentIntentService struct {
 
 func (s *paymentIntentService) Create(
 	ctx context.Context,
-	bookingID int64,
-	userID int64,
+	bookingID uuid.UUID,
+	userID uuid.UUID,
 	// idempotencyKey string,
 ) (*models.PaymentIntent, error) {
 
@@ -68,7 +68,7 @@ func (s *paymentIntentService) Create(
 		}
 
 		intent := &models.PaymentIntent{
-			ID:        uuid.NewString(),
+			ID:        uuid.New(),
 			BookingID: booking.ID,
 			Amount:    *booking.TotalPrice,
 			Currency:  "RUB",

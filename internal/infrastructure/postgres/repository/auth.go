@@ -8,6 +8,7 @@ import (
 	"ticket-booking/internal/auth/models"
 	sqlc_repository "ticket-booking/internal/db/sqlc"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -48,7 +49,7 @@ func (r *authRepository) Create(ctx context.Context, token *models.RefreshToken)
 	return r.fromSqlcAuth(&t), err
 }
 
-func (r *authRepository) GetTokenByUserID(ctx context.Context, userID int64) (*models.RefreshToken, error) {
+func (r *authRepository) GetTokenByUserID(ctx context.Context, userID uuid.UUID) (*models.RefreshToken, error) {
 	token, err := r.queries.GetTokenByUserID(ctx, userID)
 	if err != nil {
 		return nil, err

@@ -3,6 +3,8 @@ package models
 import (
 	"ticket-booking/internal/money"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type BookingStatus string
@@ -16,8 +18,8 @@ const (
 )
 
 type Booking struct {
-	ID         int64
-	AccountID  int64
+	ID         uuid.UUID
+	AccountID  uuid.UUID
 	Status     BookingStatus
 	ExpiresAt  *time.Time
 	PaidAt     *time.Time
@@ -25,8 +27,19 @@ type Booking struct {
 }
 
 type BookingIn struct {
-	AccountID int64
+	ID        uuid.UUID
+	AccountID uuid.UUID
 	Status    BookingStatus
 	ExpiresAt *time.Time
 	PaidAt    *time.Time
+}
+
+type CreateBookingParams struct {
+	EventID uuid.UUID
+	Items   []CreateBookingItemParams
+}
+
+type CreateBookingItemParams struct {
+	TicketTypeID uuid.UUID
+	Quantity     int32
 }

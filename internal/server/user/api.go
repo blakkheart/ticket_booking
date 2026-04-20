@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"ticket-booking/internal/httpx"
 	"ticket-booking/internal/user/models"
+
+	"github.com/google/uuid"
 )
 
 func (h *userHandler) CreateAccount(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {
@@ -14,14 +16,21 @@ func (h *userHandler) CreateAccount(w http.ResponseWriter, r *http.Request) (htt
 		return nil, httpx.ErrInvalidRequestBody
 	}
 
-	u, err := h.service.Create(r.Context(), &uRequest)
+	userModel := &models.CreateUserParams{
+		ID:       uuid.New(),
+		Name:     uRequest.Name,
+		Email:    uRequest.Email,
+		Password: uRequest.Password,
+	}
+
+	u, err := h.service.Create(r.Context(), userModel)
 
 	if err != nil {
 		return nil, ResolveHTTPError(err)
 	}
 
 	u_resp := models.UserResponse{
-		ID:    u.ID,
+		ID:    u.ID.String(),
 		Email: u.Email,
 		Role:  string(u.Role),
 	}

@@ -11,8 +11,6 @@ import (
 	"ticket-booking/internal/payment/models"
 	"ticket-booking/internal/repository"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 func generateHMAC(body io.ReadCloser, secret string) (string, error) {
@@ -59,12 +57,11 @@ func (s *Service) HandleCallback(ctx context.Context, provider PaymentProvider, 
 func (s *Service) CreatePayment(
 	ctx context.Context,
 	provider PaymentProvider,
-	req models.CreatePaymentRequest,
+	req models.CreatePaymentParams,
 ) (*models.CreatePaymentResponse, error) {
 
 	payment := &models.Payment{
-		ID:        uuid.NewString(),
-		PaymentID: req.PaymentID,
+		ID:        req.ID,
 		Amount:    req.Amount,
 		Currency:  req.Currency,
 		Status:    models.PaymentStatusPending,
@@ -77,8 +74,8 @@ func (s *Service) CreatePayment(
 		return nil, err
 	}
 
-	resp, err := provider.CreatePayment(ctx, models.CreatePaymentRequest{
-		PaymentID:   payment.ID,
+	resp, err := provider.CreatePayment(ctx, models.CreatePaymentParams{
+		ID:          payment.ID,
 		Amount:      payment.Amount,
 		Currency:    payment.Currency,
 		Description: req.Description,
@@ -93,7 +90,7 @@ func (s *Service) CreatePayment(
 	_ = s.repo.Update(ctx, payment)
 
 	return &models.CreatePaymentResponse{
-		PaymentID:   payment.ID,
+		PaymentID:   payment.ID.String(),
 		PaymentURL:  resp.PaymentURL,
 		ClientToken: resp.ClientToken,
 	}, nil

@@ -8,16 +8,18 @@ package sqlc_repository
 import (
 	"context"
 
+	"github.com/google/uuid"
 	usermodels "ticket-booking/internal/user/models"
 )
 
 const createAccount = `-- name: CreateAccount :one
-INSERT INTO account (name, email, password, role)
-VALUES ($1, $2, $3, $4)
+INSERT INTO account (id, name, email, password, role)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id, name, email, password, role, created_at, updated_at
 `
 
 type CreateAccountParams struct {
+	ID       uuid.UUID       `json:"id"`
 	Name     string          `json:"name"`
 	Email    string          `json:"email"`
 	Password string          `json:"password"`
@@ -26,6 +28,7 @@ type CreateAccountParams struct {
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
 	row := q.db.QueryRow(ctx, createAccount,
+		arg.ID,
 		arg.Name,
 		arg.Email,
 		arg.Password,
@@ -49,7 +52,7 @@ SELECT id, name, email, password, role, created_at, updated_at FROM account
 WHERE id = $1
 `
 
-func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
+func (q *Queries) GetAccount(ctx context.Context, id uuid.UUID) (Account, error) {
 	row := q.db.QueryRow(ctx, getAccount, id)
 	var i Account
 	err := row.Scan(

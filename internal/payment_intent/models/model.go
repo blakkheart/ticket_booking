@@ -3,6 +3,8 @@ package models
 import (
 	"ticket-booking/internal/money"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type IntentStatus string
@@ -16,8 +18,8 @@ const (
 )
 
 type PaymentIntent struct {
-	ID        string
-	BookingID int64
+	ID        uuid.UUID
+	BookingID uuid.UUID
 	Amount    money.Money
 	Currency  string
 	Status    IntentStatus

@@ -8,25 +8,28 @@ package sqlc_repository
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createTicket = `-- name: CreateTicket :one
-INSERT INTO ticket_type (name, description, price, available_quantity, event_id)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO ticket_type (id, name, description, price, available_quantity, event_id)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING id, name, description, price, available_quantity, event_id, created_at
 `
 
 type CreateTicketParams struct {
+	ID                uuid.UUID      `json:"id"`
 	Name              string         `json:"name"`
 	Description       *string        `json:"description"`
 	Price             pgtype.Numeric `json:"price"`
 	AvailableQuantity int32          `json:"available_quantity"`
-	EventID           int64          `json:"event_id"`
+	EventID           uuid.UUID      `json:"event_id"`
 }
 
 func (q *Queries) CreateTicket(ctx context.Context, arg CreateTicketParams) (TicketType, error) {
 	row := q.db.QueryRow(ctx, createTicket,
+		arg.ID,
 		arg.Name,
 		arg.Description,
 		arg.Price,
@@ -90,7 +93,7 @@ type GetTicketByIDRow struct {
 	Event      Event      `json:"event"`
 }
 
-func (q *Queries) GetTicketByID(ctx context.Context, id int64) (GetTicketByIDRow, error) {
+func (q *Queries) GetTicketByID(ctx context.Context, id uuid.UUID) (GetTicketByIDRow, error) {
 	row := q.db.QueryRow(ctx, getTicketByID, id)
 	var i GetTicketByIDRow
 	err := row.Scan(
@@ -121,8 +124,8 @@ RETURNING id, name, description, price, available_quantity, event_id, created_at
 `
 
 type UpdateTicketQuantityByIDParams struct {
-	ID                int64 `json:"id"`
-	AvailableQuantity int32 `json:"available_quantity"`
+	ID                uuid.UUID `json:"id"`
+	AvailableQuantity int32     `json:"available_quantity"`
 }
 
 func (q *Queries) UpdateTicketQuantityByID(ctx context.Context, arg UpdateTicketQuantityByIDParams) (TicketType, error) {

@@ -8,6 +8,7 @@ import (
 	"ticket-booking/internal/user"
 	"ticket-booking/internal/user/models"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -24,14 +25,15 @@ func NewUserRepository(db *pgxpool.Pool, logger *slog.Logger) *accountRepository
 	}
 }
 
-func (repo *accountRepository) Create(ctx context.Context, u *models.CreateUserRequest) (*models.User, error) {
+func (repo *accountRepository) Create(ctx context.Context, u *models.CreateUserParams) (*models.User, error) {
 	account, err := repo.queries.CreateAccount(
 		ctx,
 		sqlc_repository.CreateAccountParams{
+			ID:       u.ID,
 			Name:     u.Name,
 			Email:    u.Email,
 			Password: u.Password,
-			Role:     models.Member,
+			Role:     u.Role,
 		},
 	)
 
@@ -47,11 +49,11 @@ func (repo *accountRepository) Create(ctx context.Context, u *models.CreateUserR
 	return repo.fromSqlcAccount(&account), err
 }
 
-func (repo *accountRepository) Delete(id int64) error {
+func (repo *accountRepository) Delete(id uuid.UUID) error {
 	return nil
 }
 
-func (repo *accountRepository) Get(id int64) (*models.User, error) {
+func (repo *accountRepository) Get(id uuid.UUID) (*models.User, error) {
 	return nil, nil
 }
 

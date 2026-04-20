@@ -3,6 +3,8 @@ package models
 import (
 	"ticket-booking/internal/money"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type PaymentStatus string
@@ -15,10 +17,9 @@ const (
 )
 
 type Payment struct {
-	ID              string
-	PaymentID       string
-	PaymentIntentID int64
-	BookingID       int64
+	ID              uuid.UUID
+	PaymentIntentID uuid.UUID
+	BookingID       uuid.UUID
 	Amount          money.Money
 	Currency        string
 	Status          PaymentStatus
@@ -26,4 +27,14 @@ type Payment struct {
 	ExternalID      string // айди в системе провайдера
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
+}
+
+type CreatePaymentParams struct {
+	ID          uuid.UUID
+	Amount      money.Money
+	Currency    string
+	Description string
+
+	SuccessURL string
+	FailURL    string
 }

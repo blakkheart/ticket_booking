@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 func GetTokenFromPayload(r *http.Request) (string, error) {
@@ -24,8 +25,8 @@ func GetTokenFromPayload(r *http.Request) (string, error) {
 }
 
 type Claims struct {
-	UserID int64  `json:"uid"`
-	Role   string `json:"role"`
+	UserID uuid.UUID `json:"uid"`
+	Role   string    `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -50,7 +51,7 @@ func NewJWTManager(
 	}
 }
 
-func (j *JWTManager) generateTokenWithTTL(userID int64, role string, ttl time.Duration) (string, error) {
+func (j *JWTManager) generateTokenWithTTL(userID uuid.UUID, role string, ttl time.Duration) (string, error) {
 	expiresAt := time.Now().Add(ttl)
 	claims := Claims{
 		UserID: userID,
@@ -65,7 +66,7 @@ func (j *JWTManager) generateTokenWithTTL(userID int64, role string, ttl time.Du
 	return token.SignedString(j.secret)
 }
 
-func (j *JWTManager) GenerateAccessToken(userID int64, role string) (string, error) {
+func (j *JWTManager) GenerateAccessToken(userID uuid.UUID, role string) (string, error) {
 	accessToken, err := j.generateTokenWithTTL(userID, role, j.accessTTL)
 	if err != nil {
 		return "", err
@@ -73,7 +74,7 @@ func (j *JWTManager) GenerateAccessToken(userID int64, role string) (string, err
 	return accessToken, nil
 }
 
-func (j *JWTManager) GenerateRefreshToken(userID int64, role string) (string, error) {
+func (j *JWTManager) GenerateRefreshToken(userID uuid.UUID, role string) (string, error) {
 	refreshToken, err := j.generateTokenWithTTL(userID, role, j.refreshTTL)
 	if err != nil {
 		return "", err
@@ -81,7 +82,7 @@ func (j *JWTManager) GenerateRefreshToken(userID int64, role string) (string, er
 	return refreshToken, nil
 }
 
-func (j *JWTManager) GenerateTokenPair(userID int64, role string) (*models.JWTTokens, error) {
+func (j *JWTManager) GenerateTokenPair(userID uuid.UUID, role string) (*models.JWTTokens, error) {
 	accessToken, err := j.GenerateAccessToken(userID, role)
 	if err != nil {
 		return nil, err

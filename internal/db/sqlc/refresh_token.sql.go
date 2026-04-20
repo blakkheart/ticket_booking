@@ -8,24 +8,28 @@ package sqlc_repository
 import (
 	"context"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const createToken = `-- name: CreateToken :one
-INSERT INTO refresh_token (user_id, token_hash, expires_at, revoked, replaced_by)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO refresh_token (id, user_id, token_hash, expires_at, revoked, replaced_by)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING id, user_id, token_hash, expires_at, revoked, replaced_by, created_at
 `
 
 type CreateTokenParams struct {
-	UserID     int64     `json:"user_id"`
-	TokenHash  string    `json:"token_hash"`
-	ExpiresAt  time.Time `json:"expires_at"`
-	Revoked    bool      `json:"revoked"`
-	ReplacedBy *int64    `json:"replaced_by"`
+	ID         uuid.UUID  `json:"id"`
+	UserID     uuid.UUID  `json:"user_id"`
+	TokenHash  string     `json:"token_hash"`
+	ExpiresAt  time.Time  `json:"expires_at"`
+	Revoked    bool       `json:"revoked"`
+	ReplacedBy *uuid.UUID `json:"replaced_by"`
 }
 
 func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (RefreshToken, error) {
 	row := q.db.QueryRow(ctx, createToken,
+		arg.ID,
 		arg.UserID,
 		arg.TokenHash,
 		arg.ExpiresAt,
@@ -102,7 +106,7 @@ SELECT id, user_id, token_hash, expires_at, revoked, replaced_by, created_at FRO
 WHERE user_id = $1
 `
 
-func (q *Queries) GetTokenByUserID(ctx context.Context, userID int64) (RefreshToken, error) {
+func (q *Queries) GetTokenByUserID(ctx context.Context, userID uuid.UUID) (RefreshToken, error) {
 	row := q.db.QueryRow(ctx, getTokenByUserID, userID)
 	var i RefreshToken
 	err := row.Scan(
@@ -125,11 +129,11 @@ RETURNING id, user_id, token_hash, expires_at, revoked, replaced_by, created_at
 `
 
 type UpdateTokenByUserIDParams struct {
-	UserID     int64     `json:"user_id"`
-	TokenHash  string    `json:"token_hash"`
-	ExpiresAt  time.Time `json:"expires_at"`
-	Revoked    bool      `json:"revoked"`
-	ReplacedBy *int64    `json:"replaced_by"`
+	UserID     uuid.UUID  `json:"user_id"`
+	TokenHash  string     `json:"token_hash"`
+	ExpiresAt  time.Time  `json:"expires_at"`
+	Revoked    bool       `json:"revoked"`
+	ReplacedBy *uuid.UUID `json:"replaced_by"`
 }
 
 func (q *Queries) UpdateTokenByUserID(ctx context.Context, arg UpdateTokenByUserIDParams) (RefreshToken, error) {

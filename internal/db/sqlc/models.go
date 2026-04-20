@@ -7,13 +7,14 @@ package sqlc_repository
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	bookingmodels "ticket-booking/internal/booking/models"
 	usermodels "ticket-booking/internal/user/models"
 )
 
 type Account struct {
-	ID        int64           `json:"id"`
+	ID        uuid.UUID       `json:"id"`
 	Name      string          `json:"name"`
 	Email     string          `json:"email"`
 	Password  string          `json:"password"`
@@ -23,8 +24,8 @@ type Account struct {
 }
 
 type Booking struct {
-	ID        int64                       `json:"id"`
-	AccountID int64                       `json:"account_id"`
+	ID        uuid.UUID                   `json:"id"`
+	AccountID uuid.UUID                   `json:"account_id"`
 	Status    bookingmodels.BookingStatus `json:"status"`
 	ExpiresAt *time.Time                  `json:"expires_at"`
 	PaidAt    *time.Time                  `json:"paid_at"`
@@ -32,15 +33,15 @@ type Booking struct {
 }
 
 type BookingItem struct {
-	ID             int64          `json:"id"`
-	BookingID      int64          `json:"booking_id"`
-	TicketTypeID   int64          `json:"ticket_type_id"`
+	ID             uuid.UUID      `json:"id"`
+	BookingID      uuid.UUID      `json:"booking_id"`
+	TicketTypeID   uuid.UUID      `json:"ticket_type_id"`
 	Quantity       int32          `json:"quantity"`
 	PriceAtBooking pgtype.Numeric `json:"price_at_booking"`
 }
 
 type Event struct {
-	ID          int64      `json:"id"`
+	ID          uuid.UUID  `json:"id"`
 	Title       string     `json:"title"`
 	Description *string    `json:"description"`
 	StartsAt    time.Time  `json:"starts_at"`
@@ -50,22 +51,30 @@ type Event struct {
 	CreatedAt   time.Time  `json:"created_at"`
 }
 
+type Payment struct {
+	ID uuid.UUID `json:"id"`
+}
+
+type PaymentIntent struct {
+	ID uuid.UUID `json:"id"`
+}
+
 type RefreshToken struct {
-	ID         int64     `json:"id"`
-	UserID     int64     `json:"user_id"`
-	TokenHash  string    `json:"token_hash"`
-	ExpiresAt  time.Time `json:"expires_at"`
-	Revoked    bool      `json:"revoked"`
-	ReplacedBy *int64    `json:"replaced_by"`
-	CreatedAt  time.Time `json:"created_at"`
+	ID         uuid.UUID  `json:"id"`
+	UserID     uuid.UUID  `json:"user_id"`
+	TokenHash  string     `json:"token_hash"`
+	ExpiresAt  time.Time  `json:"expires_at"`
+	Revoked    bool       `json:"revoked"`
+	ReplacedBy *uuid.UUID `json:"replaced_by"`
+	CreatedAt  time.Time  `json:"created_at"`
 }
 
 type TicketType struct {
-	ID                int64          `json:"id"`
+	ID                uuid.UUID      `json:"id"`
 	Name              string         `json:"name"`
 	Description       *string        `json:"description"`
 	Price             pgtype.Numeric `json:"price"`
 	AvailableQuantity int32          `json:"available_quantity"`
-	EventID           int64          `json:"event_id"`
+	EventID           uuid.UUID      `json:"event_id"`
 	CreatedAt         time.Time      `json:"created_at"`
 }

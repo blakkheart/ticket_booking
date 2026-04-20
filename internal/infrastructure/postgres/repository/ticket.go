@@ -7,6 +7,7 @@ import (
 	"ticket-booking/internal/money"
 	"ticket-booking/internal/ticket/models"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -39,6 +40,7 @@ func (repo *ticketRepository) Create(ctx context.Context, t *models.TicketTypeIn
 	ticket, err := repo.queries.CreateTicket(
 		ctx,
 		sqlc_repository.CreateTicketParams{
+			ID:                t.ID,
 			Name:              t.Name,
 			Description:       t.Description,
 			Price:             price,
@@ -50,11 +52,11 @@ func (repo *ticketRepository) Create(ctx context.Context, t *models.TicketTypeIn
 	return repo.fromSqlcTicket(&ticket), err
 }
 
-func (repo *ticketRepository) Delete(id int64) error {
+func (repo *ticketRepository) Delete(id uuid.UUID) error {
 	return nil
 }
 
-func (repo *ticketRepository) UpdateTicketQuantityByID(ctx context.Context, id int64, newQuantity int32) (*models.TicketType, error) {
+func (repo *ticketRepository) UpdateTicketQuantityByID(ctx context.Context, id uuid.UUID, newQuantity int32) (*models.TicketType, error) {
 	ticket, err := repo.queries.UpdateTicketQuantityByID(ctx, sqlc_repository.UpdateTicketQuantityByIDParams{
 		ID:                id,
 		AvailableQuantity: newQuantity,
@@ -65,7 +67,7 @@ func (repo *ticketRepository) UpdateTicketQuantityByID(ctx context.Context, id i
 	return repo.fromSqlcTicket(&ticket), nil
 }
 
-func (repo *ticketRepository) Get(ctx context.Context, id int64) (*models.TicketType, error) {
+func (repo *ticketRepository) Get(ctx context.Context, id uuid.UUID) (*models.TicketType, error) {
 	ticketWithEvent, err := repo.queries.GetTicketByID(ctx, id)
 	if err != nil {
 		return nil, err

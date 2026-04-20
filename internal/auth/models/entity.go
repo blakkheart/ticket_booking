@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type JWTTokens struct {
 	RefreshToken string
@@ -8,17 +12,19 @@ type JWTTokens struct {
 }
 
 type RefreshToken struct {
-	UserID     int64
+	id         uuid.UUID
+	UserID     uuid.UUID
 	TokenHash  string
 	ExpiresAt  time.Time
 	Revoked    bool
-	ReplacedBy *int64
+	ReplacedBy *uuid.UUID
 	Token      string
 	Role       string
 }
 
 type AccessToken struct {
-	UserID    int64
+	id        uuid.UUID
+	UserID    uuid.UUID
 	Token     string
 	ExpiresAt time.Time
 	Role      string

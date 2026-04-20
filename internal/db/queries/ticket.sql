@@ -2,8 +2,8 @@
 SELECT * FROM ticket_type;
 
 -- name: CreateTicket :one
-INSERT INTO ticket_type (name, description, price, available_quantity, event_id)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO ticket_type (id, name, description, price, available_quantity, event_id)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: GetTicketByID :one

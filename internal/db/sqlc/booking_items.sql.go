@@ -8,24 +8,27 @@ package sqlc_repository
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createBookingItem = `-- name: CreateBookingItem :one
-INSERT INTO booking_items (booking_id, ticket_type_id, quantity, price_at_booking)
-VALUES ($1, $2, $3, $4)
+INSERT INTO booking_items (id, booking_id, ticket_type_id, quantity, price_at_booking)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id, booking_id, ticket_type_id, quantity, price_at_booking
 `
 
 type CreateBookingItemParams struct {
-	BookingID      int64          `json:"booking_id"`
-	TicketTypeID   int64          `json:"ticket_type_id"`
+	ID             uuid.UUID      `json:"id"`
+	BookingID      uuid.UUID      `json:"booking_id"`
+	TicketTypeID   uuid.UUID      `json:"ticket_type_id"`
 	Quantity       int32          `json:"quantity"`
 	PriceAtBooking pgtype.Numeric `json:"price_at_booking"`
 }
 
 func (q *Queries) CreateBookingItem(ctx context.Context, arg CreateBookingItemParams) (BookingItem, error) {
 	row := q.db.QueryRow(ctx, createBookingItem,
+		arg.ID,
 		arg.BookingID,
 		arg.TicketTypeID,
 		arg.Quantity,
@@ -86,7 +89,7 @@ type GetBookingItemRow struct {
 	TicketType  TicketType  `json:"ticket_type"`
 }
 
-func (q *Queries) GetBookingItem(ctx context.Context, id int64) (GetBookingItemRow, error) {
+func (q *Queries) GetBookingItem(ctx context.Context, id uuid.UUID) (GetBookingItemRow, error) {
 	row := q.db.QueryRow(ctx, getBookingItem, id)
 	var i GetBookingItemRow
 	err := row.Scan(

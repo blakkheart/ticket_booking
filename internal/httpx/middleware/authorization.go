@@ -11,16 +11,17 @@ import (
 	"ticket-booking/internal/user/models"
 
 	"github.com/casbin/casbin/v2"
+	"github.com/google/uuid"
 )
 
 type userInfo struct {
 	Role   string
-	UserID *int64
+	UserID *uuid.UUID
 }
 
 func getUserInfo(r *http.Request, jwt *auth.JWTManager) (*userInfo, error) {
 	role := string(models.Anonymous)
-	var userID int64
+	var userID uuid.UUID
 
 	token, tokenErr := auth.GetTokenFromPayload(r)
 

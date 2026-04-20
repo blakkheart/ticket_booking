@@ -1,5 +1,7 @@
 package models
 
+import "github.com/google/uuid"
+
 type Role string
 
 const (
@@ -9,15 +11,23 @@ const (
 )
 
 type User struct {
-	ID    int64
+	ID    uuid.UUID
 	Email string
 	Name  string
 	Role  Role
 }
 
 type UserAuth struct {
-	ID           int64
+	ID           uuid.UUID
 	Email        string
 	PasswordHash string
 	Role         Role
+}
+
+type CreateUserParams struct {
+	ID       uuid.UUID
+	Name     string
+	Email    string
+	Password string
+	Role     Role
 }

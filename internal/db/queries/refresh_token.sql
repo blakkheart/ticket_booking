@@ -2,8 +2,8 @@
 SELECT * FROM refresh_token;
 
 -- name: CreateToken :one
-INSERT INTO refresh_token (user_id, token_hash, expires_at, revoked, replaced_by)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO refresh_token (id, user_id, token_hash, expires_at, revoked, replaced_by)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: GetTokenByUserID :one

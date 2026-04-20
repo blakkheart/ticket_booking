@@ -2,8 +2,8 @@
 SELECT * FROM booking_items;
 
 -- name: CreateBookingItem :one
-INSERT INTO booking_items (booking_id, ticket_type_id, quantity, price_at_booking)
-VALUES ($1, $2, $3, $4)
+INSERT INTO booking_items (id, booking_id, ticket_type_id, quantity, price_at_booking)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 
 -- name: GetBookingItem :one

@@ -25,6 +25,7 @@ func (repo *eventRepository) Create(ctx context.Context, e *models.EventIn) (*mo
 	event, err := repo.queries.CreateEvent(
 		ctx,
 		sqlc_repository.CreateEventParams{
+			ID:          e.ID,
 			Title:       e.Title,
 			Description: e.Description,
 			Location:    e.Location,

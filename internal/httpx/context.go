@@ -2,6 +2,8 @@ package httpx
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type contextKey string
@@ -19,15 +21,15 @@ func GetRequestID(ctx context.Context) (string, bool) {
 	return id, ok
 }
 
-func WithUserID(ctx context.Context, id *int64) context.Context {
+func WithUserID(ctx context.Context, id *uuid.UUID) context.Context {
 	if id == nil {
 		return ctx
 	}
 	return context.WithValue(ctx, userIDKey, *id)
 }
 
-func GetUserID(ctx context.Context) (int64, bool) {
+func GetUserID(ctx context.Context) (uuid.UUID, bool) {
 	v := ctx.Value(userIDKey)
-	id, ok := v.(int64)
+	id, ok := v.(uuid.UUID)
 	return id, ok
 }

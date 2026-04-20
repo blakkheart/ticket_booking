@@ -6,6 +6,7 @@ import (
 	"ticket-booking/internal/booking/models"
 	sqlc_repository "ticket-booking/internal/db/sqlc"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -32,6 +33,7 @@ func (repo *bookingRepository) Create(ctx context.Context, b *models.BookingIn) 
 	booking, err := repo.queries.CreateBooking(
 		ctx,
 		sqlc_repository.CreateBookingParams{
+			ID:        b.ID,
 			AccountID: b.AccountID,
 			Status:    b.Status,
 			ExpiresAt: b.ExpiresAt,
@@ -42,11 +44,11 @@ func (repo *bookingRepository) Create(ctx context.Context, b *models.BookingIn) 
 	return repo.fromSqlcBooking(&booking), err
 }
 
-func (repo *bookingRepository) Delete(ctx context.Context, id int64) error {
+func (repo *bookingRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (repo *bookingRepository) Get(ctx context.Context, id int64) (*models.Booking, error) {
+func (repo *bookingRepository) Get(ctx context.Context, id uuid.UUID) (*models.Booking, error) {
 	return nil, nil
 }
 

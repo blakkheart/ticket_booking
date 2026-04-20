@@ -9,17 +9,19 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	bookingmodels "ticket-booking/internal/booking/models"
 )
 
 const createBooking = `-- name: CreateBooking :one
-INSERT INTO booking (account_id, status, expires_at, paid_at)
-VALUES ($1, $2, $3, $4)
+INSERT INTO booking (id, account_id, status, expires_at, paid_at)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id, account_id, status, expires_at, paid_at, created_at
 `
 
 type CreateBookingParams struct {
-	AccountID int64                       `json:"account_id"`
+	ID        uuid.UUID                   `json:"id"`
+	AccountID uuid.UUID                   `json:"account_id"`
 	Status    bookingmodels.BookingStatus `json:"status"`
 	ExpiresAt *time.Time                  `json:"expires_at"`
 	PaidAt    *time.Time                  `json:"paid_at"`
@@ -27,6 +29,7 @@ type CreateBookingParams struct {
 
 func (q *Queries) CreateBooking(ctx context.Context, arg CreateBookingParams) (Booking, error) {
 	row := q.db.QueryRow(ctx, createBooking,
+		arg.ID,
 		arg.AccountID,
 		arg.Status,
 		arg.ExpiresAt,

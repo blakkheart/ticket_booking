@@ -3,8 +3,7 @@ package models
 import "ticket-booking/internal/money"
 
 type CreatePaymentRequest struct {
-	PaymentID   string
-	Amount      money.Money
+	Amount      string
 	Currency    string
 	Description string
 

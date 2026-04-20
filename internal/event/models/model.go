@@ -2,10 +2,12 @@ package models
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Event struct {
-	ID          int64
+	ID          uuid.UUID
 	Title       string
 	Description *string
 	Location    string
@@ -15,6 +17,7 @@ type Event struct {
 }
 
 type EventIn struct {
+	ID          uuid.UUID
 	Title       string
 	Description *string
 	Location    string

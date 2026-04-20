@@ -7,17 +7,19 @@ import (
 	"ticket-booking/internal/repository"
 	"ticket-booking/internal/ticket/models"
 	"ticket-booking/internal/uow"
+
+	"github.com/google/uuid"
 )
 
 type Service interface {
-	Get(id int64) (*models.TicketType, error)
+	Get(id uuid.UUID) (*models.TicketType, error)
 	GetMany(filters any) []*models.TicketType
 	Create(ctx context.Context, t *models.TicketTypeIn) (*models.TicketType, error)
 	Reserve(ctx context.Context,
 		uow uow.UnitOfWork,
-		ticketTypeID int64,
+		ticketTypeID uuid.UUID,
 		quantity int32,
-		eventID int64,
+		eventID uuid.UUID,
 	) (*models.TicketType, error)
 }
 
@@ -30,7 +32,7 @@ type ticketService struct {
 	logger *slog.Logger
 }
 
-func (service *ticketService) Get(id int64) (*models.TicketType, error) {
+func (service *ticketService) Get(id uuid.UUID) (*models.TicketType, error) {
 	ticket, err := service.Get(id)
 	if err != nil {
 		return nil, err
@@ -54,9 +56,9 @@ func (service *ticketService) Create(ctx context.Context, t *models.TicketTypeIn
 
 func (service *ticketService) Reserve(ctx context.Context,
 	uow uow.UnitOfWork,
-	ticketTypeID int64,
+	ticketTypeID uuid.UUID,
 	quantity int32,
-	eventID int64,
+	eventID uuid.UUID,
 ) (*models.TicketType, error) {
 
 	repo := uow.TicketRepo()

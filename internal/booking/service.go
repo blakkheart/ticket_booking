@@ -11,12 +11,14 @@ import (
 	"ticket-booking/internal/ticket"
 	"ticket-booking/internal/uow"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Service interface {
-	Get(id int64) (*models.Booking, error)
+	Get(id uuid.UUID) (*models.Booking, error)
 	GetMany(filters any) []*models.Booking
-	Create(ctx context.Context, b *models.CreateBookingRequest, userID int64) (*models.Booking, error)
+	Create(ctx context.Context, b *models.CreateBookingParams, userID uuid.UUID) (*models.Booking, error)
 }
 
 func NewService(
@@ -47,7 +49,7 @@ type bookingService struct {
 	logger *slog.Logger
 }
 
-func (service *bookingService) Get(id int64) (*models.Booking, error) {
+func (service *bookingService) Get(id uuid.UUID) (*models.Booking, error) {
 	booking, err := service.bookingRepo.Get(context.TODO(), id)
 	return booking, err
 }
@@ -56,7 +58,7 @@ func (service *bookingService) GetMany(filters any) []*models.Booking {
 	return nil
 }
 
-func (service *bookingService) Create(ctx context.Context, b *models.CreateBookingRequest, userID int64) (res *models.Booking, err error) {
+func (service *bookingService) Create(ctx context.Context, b *models.CreateBookingParams, userID uuid.UUID) (res *models.Booking, err error) {
 
 	var result *models.Booking
 
@@ -67,6 +69,7 @@ func (service *bookingService) Create(ctx context.Context, b *models.CreateBooki
 		expiresAfter := time.Now().Add(15 * time.Minute)
 
 		bookingIn := models.BookingIn{
+			ID:        uuid.New(),
 			AccountID: userID,
 			Status:    models.StatusPending,
 			ExpiresAt: &expiresAfter,

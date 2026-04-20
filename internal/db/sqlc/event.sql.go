@@ -8,15 +8,18 @@ package sqlc_repository
 import (
 	"context"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const createEvent = `-- name: CreateEvent :one
-INSERT INTO event (title, description, location, starts_at, ends_at, status)
-VALUES ($1, $2, $3, $4, $5, $6)
+INSERT INTO event (id, title, description, location, starts_at, ends_at, status)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING id, title, description, starts_at, ends_at, location, status, created_at
 `
 
 type CreateEventParams struct {
+	ID          uuid.UUID  `json:"id"`
 	Title       string     `json:"title"`
 	Description *string    `json:"description"`
 	Location    string     `json:"location"`
@@ -27,6 +30,7 @@ type CreateEventParams struct {
 
 func (q *Queries) CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error) {
 	row := q.db.QueryRow(ctx, createEvent,
+		arg.ID,
 		arg.Title,
 		arg.Description,
 		arg.Location,
@@ -86,7 +90,7 @@ SELECT id, title, description, starts_at, ends_at, location, status, created_at 
 WHERE id = $1
 `
 
-func (q *Queries) GetEvent(ctx context.Context, id int64) (Event, error) {
+func (q *Queries) GetEvent(ctx context.Context, id uuid.UUID) (Event, error) {
 	row := q.db.QueryRow(ctx, getEvent, id)
 	var i Event
 	err := row.Scan(

@@ -31,16 +31,20 @@ func (h *handler) CreateBooking(w http.ResponseWriter, r *http.Request) (httpx.R
 		return nil, httpx.ErrInvalidRequestBody
 	}
 
-	newBooking, err := h.service.Create(r.Context(), &breq, userID)
+	bookingCreateParams, err := models.ConvertRequestToParams(&breq)
 	if err != nil {
 		return nil, ResolveHTTPError(err)
 	}
 
-	// totalPrice, _ := money.NewMoney("1")
+	newBooking, err := h.service.Create(r.Context(), bookingCreateParams, userID)
+	if err != nil {
+		return nil, ResolveHTTPError(err)
+	}
+
 	response := models.CreateBookingResponse{
-		BookingId:  newBooking.ID,
+		BookingId:  newBooking.ID.String(),
 		Status:     newBooking.Status,
-		TotalPrice: "1",
+		TotalPrice: newBooking.TotalPrice.String(),
 	}
 
 	return httpx.NewResponse(response, http.StatusCreated), nil

@@ -10,6 +10,7 @@ import (
 	"ticket-booking/internal/repository"
 	"ticket-booking/internal/user"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -21,11 +22,11 @@ func hash(token string) string {
 type Service interface {
 	Login(ctx context.Context, email string, password string) (*models.JWTTokens, error)
 	ParseToken(token string) (*Claims, error)
-	GetTokenByUserID(ctx context.Context, userID int64) (*models.RefreshToken, error)
+	GetTokenByUserID(ctx context.Context, userID uuid.UUID) (*models.RefreshToken, error)
 	UpdateTokenByUserID(ctx context.Context, newToken *models.RefreshToken) (*models.RefreshToken, error)
-	GenerateTokenPair(userID int64, role string) (*models.JWTTokens, error)
-	GenerateAccessToken(userID int64, role string) (string, error)
-	GenerateRefreshToken(userID int64, role string) (string, error)
+	GenerateTokenPair(userID uuid.UUID, role string) (*models.JWTTokens, error)
+	GenerateAccessToken(userID uuid.UUID, role string) (string, error)
+	GenerateRefreshToken(userID uuid.UUID, role string) (string, error)
 	GetTokenByHash(ctx context.Context, token string) (*models.RefreshToken, error)
 }
 
@@ -45,11 +46,11 @@ type authService struct {
 	logger      *slog.Logger
 }
 
-func (s *authService) GenerateAccessToken(userID int64, role string) (string, error) {
+func (s *authService) GenerateAccessToken(userID uuid.UUID, role string) (string, error) {
 	return s.jwt.GenerateAccessToken(userID, role)
 }
 
-func (s *authService) GenerateRefreshToken(userID int64, role string) (string, error) {
+func (s *authService) GenerateRefreshToken(userID uuid.UUID, role string) (string, error) {
 	return s.jwt.GenerateRefreshToken(userID, role)
 }
 
@@ -103,7 +104,7 @@ func (s *authService) createOrUpdate(ctx context.Context, refreshToken *models.R
 	return s.Repo.UpdateTokenByUserID(ctx, refreshToken)
 }
 
-func (s *authService) GenerateTokenPair(userID int64, role string) (*models.JWTTokens, error) {
+func (s *authService) GenerateTokenPair(userID uuid.UUID, role string) (*models.JWTTokens, error) {
 	return s.jwt.GenerateTokenPair(userID, role)
 }
 
@@ -132,7 +133,7 @@ func (s *authService) ParseToken(token string) (*Claims, error) {
 	return s.jwt.Parse(token)
 }
 
-func (s *authService) GetTokenByUserID(ctx context.Context, userID int64) (*models.RefreshToken, error) {
+func (s *authService) GetTokenByUserID(ctx context.Context, userID uuid.UUID) (*models.RefreshToken, error) {
 	return s.Repo.GetTokenByUserID(ctx, userID)
 }
 
