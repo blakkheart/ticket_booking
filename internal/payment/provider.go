@@ -16,6 +16,7 @@ type PaymentProvider interface {
 
 type MockProvider struct {
 	secret string
+	name   string
 }
 
 func (p *MockProvider) ParseCallback(r *http.Request) (*models.CallbackData, error) {
@@ -45,11 +46,12 @@ func (p *MockProvider) CreatePayment(ctx context.Context, req models.CreatePayme
 }
 
 func (p *MockProvider) Name() string {
-	return "mock"
+	return p.name
 }
 
 func NewMockProvider(secret string) *MockProvider {
 	return &MockProvider{
 		secret: secret,
+		name:   "mock",
 	}
 }

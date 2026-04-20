@@ -6,6 +6,7 @@ import (
 	sqlc_repository "ticket-booking/internal/db/sqlc"
 	"ticket-booking/internal/event/models"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -38,11 +39,11 @@ func (repo *eventRepository) Create(ctx context.Context, e *models.EventIn) (*mo
 	return repo.fromSqlcEvent(&event), err
 }
 
-func (repo *eventRepository) Delete(id int64) error {
+func (repo *eventRepository) Delete(id uuid.UUID) error {
 	return nil
 }
 
-func (repo *eventRepository) Get(id int64) (*models.Event, error) {
+func (repo *eventRepository) Get(id uuid.UUID) (*models.Event, error) {
 	return nil, nil
 }
 

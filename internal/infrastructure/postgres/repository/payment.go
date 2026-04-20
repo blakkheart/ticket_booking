@@ -6,6 +6,7 @@ import (
 	sqlc_repository "ticket-booking/internal/db/sqlc"
 	"ticket-booking/internal/payment/models"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -42,7 +43,7 @@ func (repo *paymentRepository) Get(ctx context.Context, id string) (*models.Paym
 	return nil, nil
 }
 
-func (repo *paymentRepository) GetByIntentID(ctx context.Context, intentID int64) ([]*models.Payment, error) {
+func (repo *paymentRepository) GetByIntentID(ctx context.Context, intentID uuid.UUID) ([]*models.Payment, error) {
 	return nil, nil
 }
 

@@ -5,10 +5,12 @@ import (
 	"log/slog"
 	"ticket-booking/internal/event/models"
 	"ticket-booking/internal/repository"
+
+	"github.com/google/uuid"
 )
 
 type Service interface {
-	Get(id int64) (*models.Event, error)
+	Get(id uuid.UUID) (*models.Event, error)
 	GetMany(filters any) []*models.Event
 	Create(ctx context.Context, e *models.EventIn) (*models.Event, error)
 }
@@ -22,7 +24,7 @@ type eventService struct {
 	logger *slog.Logger
 }
 
-func (service *eventService) Get(id int64) (*models.Event, error) {
+func (service *eventService) Get(id uuid.UUID) (*models.Event, error) {
 	event, err := service.Repo.Get(id)
 	if err != nil {
 		return nil, err

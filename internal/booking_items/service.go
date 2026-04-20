@@ -5,10 +5,12 @@ import (
 	"log/slog"
 	"ticket-booking/internal/booking_items/models"
 	"ticket-booking/internal/repository"
+
+	"github.com/google/uuid"
 )
 
 type Service interface {
-	Get(id int64) *models.BookingItem
+	Get(id uuid.UUID) *models.BookingItem
 	GetMany(filters any) []*models.BookingItem
 	Create(ctx context.Context, b *models.BookingItemIn) *models.BookingItem
 }
@@ -22,7 +24,7 @@ type bookingItemsService struct {
 	logger *slog.Logger
 }
 
-func (service *bookingItemsService) Get(id int64) *models.BookingItem {
+func (service *bookingItemsService) Get(id uuid.UUID) *models.BookingItem {
 	return nil
 }
 

@@ -9,6 +9,7 @@ import (
 	sqlc_repository "ticket-booking/internal/db/sqlc"
 	"ticket-booking/internal/money"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -62,11 +63,11 @@ func (repo *bookingItemsRepository) Create(ctx context.Context, b *models.Bookin
 	return repo.fromSqlcBooking(&bookingCreated), nil
 }
 
-func (repo *bookingItemsRepository) Delete(id int64) error {
+func (repo *bookingItemsRepository) Delete(id uuid.UUID) error {
 	return nil
 }
 
-func (repo *bookingItemsRepository) Get(id int64) (*models.BookingItem, error) {
+func (repo *bookingItemsRepository) Get(id uuid.UUID) (*models.BookingItem, error) {
 	return nil, nil
 }
 
