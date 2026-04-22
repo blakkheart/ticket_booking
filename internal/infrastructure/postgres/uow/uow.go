@@ -27,6 +27,7 @@ type uow struct {
 	queries *sqlc_repository.Queries
 
 	bookingRepo       repositoryInteface.BookingRepository
+	eventRepo         repositoryInteface.EventRepository
 	ticketRepo        repositoryInteface.TicketRepository
 	bookingItemsRepo  repositoryInteface.BookingItemsRepository
 	paymentIntentRepo repositoryInteface.PaymentIntentRepository
@@ -41,6 +42,7 @@ func newUow(tx pgx.Tx, logger *slog.Logger) *uow {
 		queries: q,
 
 		bookingRepo:       repository.NewBookingRepositoryFromQueries(q, logger),
+		eventRepo:         repository.NewEventRepositoryFromQueries(q, logger),
 		ticketRepo:        repository.NewTicketRepositoryFromQueries(q, logger),
 		bookingItemsRepo:  repository.NewBookingItemsRepositoryFromQueries(q, logger),
 		paymentIntentRepo: repository.NewPaymentIntentRepositoryFromQueries(q, logger),
@@ -50,6 +52,10 @@ func newUow(tx pgx.Tx, logger *slog.Logger) *uow {
 
 func (u *uow) BookingRepo() repositoryInteface.BookingRepository {
 	return u.bookingRepo
+}
+
+func (u *uow) EventRepo() repositoryInteface.EventRepository {
+	return u.eventRepo
 }
 
 func (u *uow) TicketRepo() repositoryInteface.TicketRepository {

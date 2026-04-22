@@ -18,14 +18,20 @@ type accountRepository struct {
 	logger  *slog.Logger
 }
 
-func NewUserRepository(db *pgxpool.Pool, logger *slog.Logger) *accountRepository {
+func NewUserRepository(
+	db *pgxpool.Pool,
+	logger *slog.Logger,
+) *accountRepository {
 	return &accountRepository{
 		queries: sqlc_repository.New(db),
 		logger:  logger,
 	}
 }
 
-func (repo *accountRepository) Create(ctx context.Context, u *models.CreateUserParams) (*models.User, error) {
+func (repo *accountRepository) Create(
+	ctx context.Context,
+	u *models.CreateUserParams,
+) (*models.User, error) {
 	account, err := repo.queries.CreateAccount(
 		ctx,
 		sqlc_repository.CreateAccountParams{
@@ -61,7 +67,10 @@ func (repo *accountRepository) GetMany(filter any) ([]*models.User, error) {
 	return nil, nil
 }
 
-func (repo *accountRepository) GetByEmail(ctx context.Context, email string) (*models.UserAuth, error) {
+func (repo *accountRepository) GetByEmail(
+	ctx context.Context,
+	email string,
+) (*models.UserAuth, error) {
 	acc, err := repo.queries.GetAccountByEmail(ctx, email)
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -78,7 +87,9 @@ func (repo *accountRepository) GetByEmail(ctx context.Context, email string) (*m
 
 }
 
-func (repo *accountRepository) fromSqlcAccount(a *sqlc_repository.Account) *models.User {
+func (repo *accountRepository) fromSqlcAccount(
+	a *sqlc_repository.Account,
+) *models.User {
 	account := &models.User{
 		ID:    a.ID,
 		Email: a.Email,

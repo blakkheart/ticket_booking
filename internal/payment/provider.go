@@ -9,7 +9,10 @@ import (
 
 type PaymentProvider interface {
 	Name() string
-	CreatePayment(ctx context.Context, req models.CreatePaymentParams) (*models.CreatePaymentResponse, error)
+	CreatePayment(
+		ctx context.Context,
+		req models.CreatePaymentParams,
+	) (*models.CreatePaymentResponse, error)
 	VerifySignature(r *http.Request) error
 	ParseCallback(r *http.Request) (*models.CallbackData, error)
 }
@@ -39,7 +42,10 @@ func (p *MockProvider) VerifySignature(r *http.Request) error {
 	return nil
 }
 
-func (p *MockProvider) CreatePayment(ctx context.Context, req models.CreatePaymentParams) (*models.CreatePaymentResponse, error) {
+func (p *MockProvider) CreatePayment(
+	ctx context.Context,
+	req models.CreatePaymentParams,
+) (*models.CreatePaymentResponse, error) {
 	return &models.CreatePaymentResponse{
 		PaymentURL: "http://localhost:8080/mock/pay",
 	}, nil

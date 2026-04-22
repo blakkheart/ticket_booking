@@ -31,7 +31,11 @@ type Service struct {
 	repo repository.PaymentRepository
 }
 
-func (s *Service) HandleCallback(ctx context.Context, provider PaymentProvider, r *http.Request) error {
+func (s *Service) HandleCallback(
+	ctx context.Context,
+	provider PaymentProvider,
+	r *http.Request,
+) error {
 	if err := provider.VerifySignature(r); err != nil {
 		return err
 	}

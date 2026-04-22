@@ -18,7 +18,11 @@ import (
 type Service interface {
 	Get(id uuid.UUID) (*models.Booking, error)
 	GetMany(filters any) []*models.Booking
-	Create(ctx context.Context, b *models.CreateBookingParams, userID uuid.UUID) (*models.Booking, error)
+	Create(
+		ctx context.Context,
+		b *models.CreateBookingParams,
+		userID uuid.UUID,
+	) (*models.Booking, error)
 }
 
 func NewService(
@@ -58,7 +62,11 @@ func (service *bookingService) GetMany(filters any) []*models.Booking {
 	return nil
 }
 
-func (service *bookingService) Create(ctx context.Context, b *models.CreateBookingParams, userID uuid.UUID) (res *models.Booking, err error) {
+func (service *bookingService) Create(
+	ctx context.Context,
+	b *models.CreateBookingParams,
+	userID uuid.UUID,
+) (res *models.Booking, err error) {
 
 	var result *models.Booking
 

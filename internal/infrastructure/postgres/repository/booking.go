@@ -15,21 +15,30 @@ type bookingRepository struct {
 	logger  *slog.Logger
 }
 
-func NewBookingRepository(db *pgxpool.Pool, logger *slog.Logger) *bookingRepository {
+func NewBookingRepository(
+	db *pgxpool.Pool,
+	logger *slog.Logger,
+) *bookingRepository {
 	return &bookingRepository{
 		queries: sqlc_repository.New(db),
 		logger:  logger,
 	}
 }
 
-func NewBookingRepositoryFromQueries(q *sqlc_repository.Queries, logger *slog.Logger) *bookingRepository {
+func NewBookingRepositoryFromQueries(
+	q *sqlc_repository.Queries,
+	logger *slog.Logger,
+) *bookingRepository {
 	return &bookingRepository{
 		queries: q,
 		logger:  logger,
 	}
 }
 
-func (repo *bookingRepository) Create(ctx context.Context, b *models.BookingIn) (*models.Booking, error) {
+func (repo *bookingRepository) Create(
+	ctx context.Context,
+	b *models.BookingIn,
+) (*models.Booking, error) {
 	booking, err := repo.queries.CreateBooking(
 		ctx,
 		sqlc_repository.CreateBookingParams{
@@ -44,23 +53,37 @@ func (repo *bookingRepository) Create(ctx context.Context, b *models.BookingIn) 
 	return repo.fromSqlcBooking(&booking), err
 }
 
-func (repo *bookingRepository) Delete(ctx context.Context, id uuid.UUID) error {
+func (repo *bookingRepository) Delete(
+	ctx context.Context,
+	id uuid.UUID,
+) error {
 	return nil
 }
 
-func (repo *bookingRepository) Get(ctx context.Context, id uuid.UUID) (*models.Booking, error) {
+func (repo *bookingRepository) Get(
+	ctx context.Context,
+	id uuid.UUID,
+) (*models.Booking, error) {
 	return nil, nil
 }
 
-func (repo *bookingRepository) GetMany(ctx context.Context, filter any) ([]*models.Booking, error) {
+func (repo *bookingRepository) GetMany(
+	ctx context.Context,
+	filter any,
+) ([]*models.Booking, error) {
 	return nil, nil
 }
 
-func (repo *bookingRepository) Update(ctx context.Context, booking *models.Booking) error {
+func (repo *bookingRepository) Update(
+	ctx context.Context,
+	booking *models.Booking,
+) error {
 	return nil
 }
 
-func (repo *bookingRepository) fromSqlcBooking(b *sqlc_repository.Booking) *models.Booking {
+func (repo *bookingRepository) fromSqlcBooking(
+	b *sqlc_repository.Booking,
+) *models.Booking {
 	booking := &models.Booking{
 		ID:        b.ID,
 		AccountID: b.AccountID,

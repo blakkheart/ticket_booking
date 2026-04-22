@@ -26,7 +26,7 @@ func getUserInfo(r *http.Request, jwt *auth.JWTManager) (*userInfo, error) {
 	token, tokenErr := auth.GetTokenFromPayload(r)
 
 	if tokenErr != nil {
-		slog.Info("middleware auth - failed to get token", "tokenErr", tokenErr)
+		slog.Info("Failed to get token", "tokenErr", tokenErr)
 	} else {
 
 		claims, err := jwt.Parse(token)
@@ -65,7 +65,13 @@ func Authorizer(e *casbin.Enforcer, jwt *auth.JWTManager) Middleware {
 			ctx := httpx.WithUserID(r.Context(), userInfo.UserID)
 			r = r.WithContext(ctx)
 
-			slog.Debug("Enforcing auth", "requestID", reqID, "role", userInfo.Role, "path", r.URL.Path, "method", r.Method)
+			slog.Debug(
+				"Enforcing auth",
+				"requestID", reqID,
+				"role", userInfo.Role,
+				"path", r.URL.Path,
+				"method", r.Method,
+			)
 
 			res, err := e.Enforce(userInfo.Role, r.URL.Path, r.Method)
 

@@ -8,7 +8,10 @@ import (
 )
 
 type EventRepository interface {
-	Create(ctx context.Context, dto *models.EventIn) (*models.Event, error)
+	Create(
+		ctx context.Context,
+		dto *models.EventIn,
+	) (*models.Event, error)
 	Delete(id uuid.UUID) error
 	Get(id uuid.UUID) (*models.Event, error)
 	GetMany(filter any) ([]*models.Event, error)

@@ -2,10 +2,18 @@ package config
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/spf13/viper"
 )
+
+var allowedEnv = map[string]bool{
+	"local":   true,
+	"staging": true,
+	"prod":    true,
+}
 
 type Config struct {
 	App     AppConfig     `mapstructure:"app"`
@@ -17,6 +25,7 @@ type Config struct {
 
 type AppConfig struct {
 	Name string `mapstructure:"name"`
+	Env  string `mapstracture:"env"`
 }
 
 var AppConfigs Config
@@ -47,6 +56,7 @@ func InitConfigs() {
 func bindEnvs(v *viper.Viper) {
 	keys := []string{
 		"app.name",
+		"app.env",
 
 		"db.host",
 		"db.port",
@@ -60,6 +70,7 @@ func bindEnvs(v *viper.Viper) {
 
 		"auth.secret_key",
 		"auth.token_duration",
+		"auth.issuer",
 
 		"payment.provider",
 		"payment.secret",
@@ -70,7 +81,13 @@ func bindEnvs(v *viper.Viper) {
 	}
 }
 func validateConfig() {
+	if _, ok := allowedEnv[AppConfigs.App.Env]; !ok {
+		keys := slices.Collect(maps.Keys(allowedEnv))
+		result := strings.Join(keys, ", ")
+		panic(fmt.Sprintf("ENV is not allowed. Choose from %s", result))
+	}
 	if AppConfigs.DB.Host == "" {
 		panic("DB_HOST is not set")
 	}
+
 }

@@ -18,16 +18,21 @@ import (
 )
 
 func main() {
+	config.InitConfigs()
 
 	opts := &slog.HandlerOptions{
 		Level:     slog.LevelDebug,
 		AddSource: true,
 	}
-	handler := slog.NewTextHandler(os.Stdout, opts)
-	logger := slog.New(handler)
+	var logger *slog.Logger
+	if config.AppConfigs.App.Env == "local" {
+		handler := slog.NewTextHandler(os.Stdout, opts)
+		logger = slog.New(handler)
+	} else {
+		handler := slog.NewJSONHandler(os.Stdout, opts)
+		logger = slog.New(handler)
+	}
 	slog.SetDefault(logger)
-
-	config.InitConfigs()
 
 	authEnforcer, authErr := casbin.NewEnforcer(
 		"./internal/config/casbin/auth_model.conf",
@@ -37,7 +42,12 @@ func main() {
 		slog.Error("Error occured while initializing authentication", "error", authErr)
 	}
 
-	jwt := auth.NewJWTManager(config.AppConfigs.Auth.SecretKey, "test", config.AppConfigs.Auth.TokenDuration, 24*90*time.Hour)
+	jwt := auth.NewJWTManager(
+		config.AppConfigs.Auth.SecretKey,
+		config.AppConfigs.Auth.Issuer,
+		config.AppConfigs.Auth.TokenDuration,
+		24*90*time.Hour,
+	)
 
 	dbPool := postgres.CreateConnection(&config.AppConfigs.DB)
 	defer dbPool.Close()

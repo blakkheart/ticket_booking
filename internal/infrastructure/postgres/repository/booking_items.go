@@ -20,21 +20,30 @@ type bookingItemsRepository struct {
 	logger  *slog.Logger
 }
 
-func NewBookingItemsRepository(db *pgxpool.Pool, logger *slog.Logger) *bookingItemsRepository {
+func NewBookingItemsRepository(
+	db *pgxpool.Pool,
+	logger *slog.Logger,
+) *bookingItemsRepository {
 	return &bookingItemsRepository{
 		queries: sqlc_repository.New(db),
 		logger:  logger,
 	}
 }
 
-func NewBookingItemsRepositoryFromQueries(q *sqlc_repository.Queries, logger *slog.Logger) *bookingItemsRepository {
+func NewBookingItemsRepositoryFromQueries(
+	q *sqlc_repository.Queries,
+	logger *slog.Logger,
+) *bookingItemsRepository {
 	return &bookingItemsRepository{
 		queries: q,
 		logger:  logger,
 	}
 }
 
-func (repo *bookingItemsRepository) Create(ctx context.Context, b *models.BookingItemIn) (*models.BookingItem, error) {
+func (repo *bookingItemsRepository) Create(
+	ctx context.Context,
+	b *models.BookingItemIn,
+) (*models.BookingItem, error) {
 	var price pgtype.Numeric
 	if err := price.Scan(b.PriceAtBooking.String()); err != nil {
 		return nil, err
@@ -75,7 +84,9 @@ func (repo *bookingItemsRepository) GetMany(filter any) ([]*models.BookingItem, 
 	return nil, nil
 }
 
-func (repo *bookingItemsRepository) fromSqlcBooking(b *sqlc_repository.BookingItem) *models.BookingItem {
+func (repo *bookingItemsRepository) fromSqlcBooking(
+	b *sqlc_repository.BookingItem,
+) *models.BookingItem {
 	var priceStr string
 	_ = b.PriceAtBooking.Scan(&priceStr)
 	moneyType, _ := money.NewMoney(priceStr)

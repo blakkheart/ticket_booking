@@ -1,3 +1,7 @@
+app:
+  name: ticket-booking
+  env: local
+
 db:
   host: localhost
   port: 5432
@@ -13,6 +17,7 @@ server:
 auth:
   secret_key: supersecret
   token_duration: 24h
+  issuer: "test"
 
 payment:
   provider: mock # stripe etc

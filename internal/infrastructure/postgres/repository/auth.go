@@ -81,13 +81,16 @@ func (r *authRepository) UpdateTokenByUserID(
 	ctx context.Context,
 	newToken *models.RefreshToken,
 ) (*models.RefreshToken, error) {
-	token, err := r.queries.UpdateTokenByUserID(ctx, sqlc_repository.UpdateTokenByUserIDParams{
-		UserID:     newToken.UserID,
-		TokenHash:  newToken.TokenHash,
-		ExpiresAt:  newToken.ExpiresAt,
-		Revoked:    newToken.Revoked,
-		ReplacedBy: newToken.ReplacedBy,
-	})
+	token, err := r.queries.UpdateTokenByUserID(
+		ctx,
+		sqlc_repository.UpdateTokenByUserIDParams{
+			UserID:     newToken.UserID,
+			TokenHash:  newToken.TokenHash,
+			ExpiresAt:  newToken.ExpiresAt,
+			Revoked:    newToken.Revoked,
+			ReplacedBy: newToken.ReplacedBy,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}

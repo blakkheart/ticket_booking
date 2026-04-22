@@ -26,7 +26,11 @@ func (r *Router) Include(fn func(*Router)) {
 	fn(r)
 }
 
-func RegisterRoutes(mux *http.ServeMux, prefix string, routes ...func(*Router)) {
+func RegisterRoutes(
+	mux *http.ServeMux,
+	prefix string,
+	routes ...func(*Router),
+) {
 	router := NewRouter(mux, prefix)
 
 	for _, r := range routes {

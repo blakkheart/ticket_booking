@@ -14,7 +14,10 @@ import (
 type Service interface {
 	Get(id uuid.UUID) (*models.TicketType, error)
 	GetMany(filters any) []*models.TicketType
-	Create(ctx context.Context, t *models.TicketTypeIn) (*models.TicketType, error)
+	Create(
+		ctx context.Context,
+		t *models.TicketTypeIn,
+	) (*models.TicketType, error)
 	Reserve(ctx context.Context,
 		uow uow.UnitOfWork,
 		ticketTypeID uuid.UUID,
@@ -23,7 +26,10 @@ type Service interface {
 	) (*models.TicketType, error)
 }
 
-func NewService(repo repository.TicketRepository, logger *slog.Logger) Service {
+func NewService(
+	repo repository.TicketRepository,
+	logger *slog.Logger,
+) Service {
 	return &ticketService{Repo: repo, logger: logger}
 }
 
@@ -45,7 +51,10 @@ func (service *ticketService) GetMany(filters any) []*models.TicketType {
 	return nil
 }
 
-func (service *ticketService) Create(ctx context.Context, t *models.TicketTypeIn) (*models.TicketType, error) {
+func (service *ticketService) Create(
+	ctx context.Context,
+	t *models.TicketTypeIn,
+) (*models.TicketType, error) {
 	ticket, err := service.Create(ctx, t)
 	if err != nil {
 		return nil, err
@@ -76,7 +85,11 @@ func (service *ticketService) Reserve(ctx context.Context,
 		return nil, errors.New("Avaliable ticket quantity is too low")
 	}
 
-	ticket, err := repo.UpdateTicketQuantityByID(ctx, ticketTypeID, ticketType.AvailableQuantity-quantity)
+	ticket, err := repo.UpdateTicketQuantityByID(
+		ctx,
+		ticketTypeID,
+		ticketType.AvailableQuantity-quantity,
+	)
 	if err != nil {
 		return nil, err
 	}

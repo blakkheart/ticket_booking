@@ -35,26 +35,43 @@ func NewPaymentRepositoryFromQueries(
 	}
 }
 
-func (repo *paymentRepository) Create(ctx context.Context, p *models.Payment) error {
+func (repo *paymentRepository) Create(
+	ctx context.Context,
+	p *models.Payment,
+) error {
 	return nil
 }
 
-func (repo *paymentRepository) Get(ctx context.Context, id string) (*models.Payment, error) {
+func (repo *paymentRepository) Get(
+	ctx context.Context,
+	id string,
+) (*models.Payment, error) {
 	return nil, nil
 }
 
-func (repo *paymentRepository) GetByIntentID(ctx context.Context, intentID uuid.UUID) ([]*models.Payment, error) {
+func (repo *paymentRepository) GetByIntentID(
+	ctx context.Context,
+	intentID uuid.UUID,
+) ([]*models.Payment, error) {
 	return nil, nil
 }
 
-func (repo *paymentRepository) GetMany(ctx context.Context, filter any) ([]*models.Payment, error) {
+func (repo *paymentRepository) GetMany(
+	ctx context.Context,
+	filter any,
+) ([]*models.Payment, error) {
 	return nil, nil
 }
 
-func (repo *paymentRepository) Update(ctx context.Context, booking *models.Payment) error {
+func (repo *paymentRepository) Update(
+	ctx context.Context,
+	booking *models.Payment,
+) error {
 	return nil
 }
 
-func (repo *paymentRepository) fromSqlcPaymentIntent(b *sqlc_repository.Booking) *models.Payment {
+func (repo *paymentRepository) fromSqlcPaymentIntent(
+	b *sqlc_repository.Booking,
+) *models.Payment {
 	return nil
 }

@@ -9,7 +9,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func (h *userHandler) CreateAccount(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {
+func (h *userHandler) CreateAccount(
+	w http.ResponseWriter,
+	r *http.Request,
+) (httpx.Response, error) {
 	var uRequest models.CreateUserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&uRequest); err != nil {

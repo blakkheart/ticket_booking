@@ -14,11 +14,20 @@ import (
 type Service interface {
 	Get(id uuid.UUID) (*models.User, error)
 	GetMany(filters any) []*models.User
-	Create(ctx context.Context, user *models.CreateUserParams) (*models.User, error)
-	GetUserAuthByEmail(ctx context.Context, email string) (*models.UserAuth, error)
+	Create(
+		ctx context.Context,
+		user *models.CreateUserParams,
+	) (*models.User, error)
+	GetUserAuthByEmail(
+		ctx context.Context,
+		email string,
+	) (*models.UserAuth, error)
 }
 
-func NewService(repo repository.UserRepository, logger *slog.Logger) Service {
+func NewService(
+	repo repository.UserRepository,
+	logger *slog.Logger,
+) Service {
 	return &userService{Repo: repo, logger: logger}
 }
 
@@ -52,7 +61,10 @@ func (s *userService) GetUser() models.User {
 	}
 }
 
-func (s *userService) Create(ctx context.Context, user *models.CreateUserParams) (*models.User, error) {
+func (s *userService) Create(
+	ctx context.Context,
+	user *models.CreateUserParams,
+) (*models.User, error) {
 	hashedPassword, err := s.hashPassword(user.Password)
 
 	if err != nil {
@@ -72,7 +84,10 @@ func (s *userService) Create(ctx context.Context, user *models.CreateUserParams)
 	return value, nil
 }
 
-func (s *userService) GetUserAuthByEmail(ctx context.Context, email string) (*models.UserAuth, error) {
+func (s *userService) GetUserAuthByEmail(
+	ctx context.Context,
+	email string,
+) (*models.UserAuth, error) {
 	value, err := s.Repo.GetByEmail(ctx, email)
 
 	if err != nil {

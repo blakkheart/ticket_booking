@@ -8,10 +8,15 @@ import (
 	"ticket-booking/internal/httpx"
 )
 
-func (h *handler) GetBooking(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {
+func (h *handler) GetBooking(
+	w http.ResponseWriter,
+	r *http.Request,
+) (httpx.Response, error) {
 	//id64, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
-	// user := config.ContainerService.Service.GetUser()
-	// event := config.ContainerService.Service.GetEvent(32)
+	// userID, ok := httpx.GetUserID(r.Context())
+	// if !ok {
+	// 	return nil, ResolveHTTPError(errors.New("Something wrong with user"))
+	// }
 
 	// get_model := config.ContainerService.Service.GetBooking(user, event)
 	get_model := 1
@@ -19,7 +24,10 @@ func (h *handler) GetBooking(w http.ResponseWriter, r *http.Request) (httpx.Resp
 	return httpx.NewResponse(get_model, http.StatusOK), nil
 }
 
-func (h *handler) CreateBooking(w http.ResponseWriter, r *http.Request) (httpx.Response, error) {
+func (h *handler) CreateBooking(
+	w http.ResponseWriter,
+	r *http.Request,
+) (httpx.Response, error) {
 
 	userID, ok := httpx.GetUserID(r.Context())
 	if !ok {
@@ -36,7 +44,11 @@ func (h *handler) CreateBooking(w http.ResponseWriter, r *http.Request) (httpx.R
 		return nil, ResolveHTTPError(err)
 	}
 
-	newBooking, err := h.service.Create(r.Context(), bookingCreateParams, userID)
+	newBooking, err := h.service.Create(
+		r.Context(),
+		bookingCreateParams,
+		userID,
+	)
 	if err != nil {
 		return nil, ResolveHTTPError(err)
 	}

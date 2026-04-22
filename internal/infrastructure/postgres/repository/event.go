@@ -22,6 +22,13 @@ func NewEventRepository(db *pgxpool.Pool, logger *slog.Logger) *eventRepository 
 	}
 }
 
+func NewEventRepositoryFromQueries(q *sqlc_repository.Queries, logger *slog.Logger) *eventRepository {
+	return &eventRepository{
+		queries: q,
+		logger:  logger,
+	}
+}
+
 func (repo *eventRepository) Create(ctx context.Context, e *models.EventIn) (*models.Event, error) {
 	event, err := repo.queries.CreateEvent(
 		ctx,

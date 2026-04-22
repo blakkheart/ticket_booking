@@ -12,10 +12,16 @@ import (
 type Service interface {
 	Get(id uuid.UUID) (*models.Event, error)
 	GetMany(filters any) []*models.Event
-	Create(ctx context.Context, e *models.EventIn) (*models.Event, error)
+	Create(
+		ctx context.Context,
+		e *models.EventIn,
+	) (*models.Event, error)
 }
 
-func NewService(repo repository.EventRepository, logger *slog.Logger) Service {
+func NewService(
+	repo repository.EventRepository,
+	logger *slog.Logger,
+) Service {
 	return &eventService{Repo: repo, logger: logger}
 }
 
@@ -36,7 +42,10 @@ func (service *eventService) GetMany(filters any) []*models.Event {
 	return nil
 }
 
-func (service *eventService) Create(ctx context.Context, e *models.EventIn) (*models.Event, error) {
+func (service *eventService) Create(
+	ctx context.Context,
+	e *models.EventIn,
+) (*models.Event, error) {
 
 	u := &models.EventIn{
 		Title: "1",
