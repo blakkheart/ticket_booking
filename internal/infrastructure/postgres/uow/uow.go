@@ -18,13 +18,14 @@ type UOW interface {
 	paymentIntentRepo() repositoryInteface.PaymentIntentRepository
 	paymentRepo() repositoryInteface.PaymentRepository
 
-	Commit() error
-	Rollback() error
+	Commit(ctx context.Context) error
+	Rollback(ctx context.Context) error
 }
 
 type uow struct {
 	tx      pgx.Tx
 	queries *sqlc_repository.Queries
+	logger *slog.Logger
 
 	bookingRepo       repositoryInteface.BookingRepository
 	eventRepo         repositoryInteface.EventRepository
@@ -40,6 +41,7 @@ func newUow(tx pgx.Tx, logger *slog.Logger) *uow {
 	return &uow{
 		tx:      tx,
 		queries: q,
+		logger: logger,
 
 		bookingRepo:       repository.NewBookingRepositoryFromQueries(q, logger),
 		eventRepo:         repository.NewEventRepositoryFromQueries(q, logger),
@@ -66,7 +68,7 @@ func (u *uow) BookingItemsRepo() repositoryInteface.BookingItemsRepository {
 	return u.bookingItemsRepo
 }
 func (u *uow) PaymentRepo() repositoryInteface.PaymentRepository {
-	return u.PaymentRepo()
+	return u.paymentRepo
 }
 func (u *uow) PaymentIntentRepo() repositoryInteface.PaymentIntentRepository {
 	return u.paymentIntentRepo
@@ -80,14 +82,14 @@ func (u *uow) Rollback(ctx context.Context) error {
 	err := u.tx.Rollback(ctx)
 	if err != nil {
 		if errors.Is(err, pgx.ErrTxClosed) {
-			slog.Debug("rollback skipped. tx already closed")
+			u.logger.Debug("rollback skipped. tx already closed")
 			return nil
 		}
 
-		slog.Error("rollback failed", "error", err)
+		u.logger.Error("rollback failed", "error", err)
 		return err
 	}
 
-	slog.Debug("transaction rolled back")
+	u.logger.Debug("transaction rolled back")
 	return nil
 }

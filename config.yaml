@@ -5,9 +5,9 @@ app:
 db:
   host: localhost
   port: 5432
-  user: wowsp
+  user: tssdr
   name: booking
-  password: wowsp
+  password: tssdr
   sslmode: disable
 
 server:
