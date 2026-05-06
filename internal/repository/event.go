@@ -13,6 +13,17 @@ type EventRepository interface {
 		dto *models.EventIn,
 	) (*models.Event, error)
 	Delete(id uuid.UUID) error
-	Get(id uuid.UUID) (*models.Event, error)
-	GetMany(filter any) ([]*models.Event, error)
+	Get(
+		ctx context.Context,
+		id uuid.UUID,
+	) (*models.Event, error)
+	GetMany(
+		ctx context.Context,
+		filter *models.EventFilter,
+	) ([]*models.Event, error)
+	UpdateById(
+		ctx context.Context,
+		id uuid.UUID,
+		e *models.EventUpdate,
+	) (*models.Event, error)
 }

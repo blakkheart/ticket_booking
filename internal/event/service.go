@@ -10,11 +10,22 @@ import (
 )
 
 type Service interface {
-	Get(id uuid.UUID) (*models.Event, error)
-	GetMany(filters any) []*models.Event
+	Get(
+		ctx context.Context,
+		id uuid.UUID,
+	) (*models.Event, error)
+	GetMany(
+		ctx context.Context,
+		filters *models.EventFilter,
+	) []*models.Event
 	Create(
 		ctx context.Context,
 		e *models.EventIn,
+	) (*models.Event, error)
+	UpdateById(
+		ctx context.Context,
+		id uuid.UUID,
+		e *models.EventUpdate,
 	) (*models.Event, error)
 }
 
@@ -30,16 +41,20 @@ type eventService struct {
 	logger *slog.Logger
 }
 
-func (service *eventService) Get(id uuid.UUID) (*models.Event, error) {
-	event, err := service.Repo.Get(id)
+func (service *eventService) Get(ctx context.Context, id uuid.UUID) (*models.Event, error) {
+	event, err := service.Repo.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	return event, nil
 }
 
-func (service *eventService) GetMany(filters any) []*models.Event {
-	return nil
+func (service *eventService) GetMany(ctx context.Context, filters *models.EventFilter) []*models.Event {
+	events, err := service.Repo.GetMany(ctx, filters)
+	if err != nil {
+		return nil
+	}
+	return events
 }
 
 func (service *eventService) Create(
@@ -47,14 +62,22 @@ func (service *eventService) Create(
 	e *models.EventIn,
 ) (*models.Event, error) {
 
-	u := &models.EventIn{
-		Title: "1",
-	}
-
-	event, err := service.Repo.Create(ctx, u)
+	event, err := service.Repo.Create(ctx, e)
 	if err != nil {
 		return nil, err
 	}
 
+	return event, nil
+}
+
+func (service *eventService) UpdateById(
+	ctx context.Context,
+	id uuid.UUID,
+	e *models.EventUpdate,
+) (*models.Event, error) {
+	event, err := service.Repo.UpdateById(ctx, id, e)
+	if err != nil {
+		return nil, err
+	}
 	return event, nil
 }

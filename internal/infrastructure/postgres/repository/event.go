@@ -50,11 +50,23 @@ func (repo *eventRepository) Delete(id uuid.UUID) error {
 	return nil
 }
 
-func (repo *eventRepository) Get(id uuid.UUID) (*models.Event, error) {
+func (repo *eventRepository) Get(ctx context.Context, id uuid.UUID) (*models.Event, error) {
+	event, err := repo.queries.GetEvent(context.Background(), id)
+	if err != nil {
+		return nil, err
+	}
+	return repo.fromSqlcEvent(&event), nil
+}
+
+func (repo *eventRepository) GetMany(ctx context.Context, filter *models.EventFilter) ([]*models.Event, error) {
 	return nil, nil
 }
 
-func (repo *eventRepository) GetMany(filter any) ([]*models.Event, error) {
+func (repo *eventRepository) UpdateById(
+	ctx context.Context,
+	id uuid.UUID,
+	e *models.EventUpdate,
+) (*models.Event, error) {
 	return nil, nil
 }
 
