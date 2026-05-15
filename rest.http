@@ -1,28 +1,41 @@
-POST http://127.0.0.1:8080/api/login
-
-
-###
-
-
-POST http://127.0.0.1:8080/api/register
+POST http://127.0.0.1:8080/api/auth/login
 content-type: application/json
 
 {   
-    "email": "test@test.test",
+    "email": "test@test.test6",
     "name": "sample",
     "password": "testPassword"
 }
 
 ###
 
-POST http://127.0.0.1:8080/api/get_ticket
+POST http://127.0.0.1:8080/api/user/register
 content-type: application/json
-authorization: Bearer xxx
 
-{
-    "email": "test@test.test",
+{   
+    "email": "test@test.test6",
     "name": "sample",
     "password": "testPassword"
+}
+
+###
+
+POST http://127.0.0.1:8080/api/booking/create
+content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsInJvbGUiOiJtZW1iZXIiLCJpc3MiOiJ0ZXN0IiwiZXhwIjoxNzc1NTU5MzU4LCJpYXQiOjE3NzU0NzI5NTh9.v2ua7YyCVhlbmhL5OM2yz5sdbgJliUDouWRoFTpBKHg
+
+{
+    "event_id": 123,
+	"items": [
+	    {
+	        "ticket_type_id": 1,
+	        "quantity": 2
+	    },
+		{
+	        "ticket_type_id": 2,
+	        "quantity": 3
+	    }
+	]
 }
 
 ###

@@ -5,15 +5,35 @@ import (
 	"net/http"
 )
 
-func WriteJsonResponse(w http.ResponseWriter, data any, status int) {
+type Response interface {
+	Data() any
+	Status() int
+	WriteJson(w http.ResponseWriter) error
+}
+
+func (r *response) Data() any {
+	return r.data
+}
+
+func (r *response) Status() int {
+	return r.status
+}
+
+type response struct {
+	data   any
+	status int
+}
+
+func NewResponse(data any, status int) Response {
+	return &response{
+		data:   data,
+		status: status,
+	}
+}
+
+func (r *response) WriteJson(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
+	w.WriteHeader(r.status)
 
-	_ = json.NewEncoder(w).Encode(data)
-	// jData, err := json.Marshal(data)
-	// if err != nil {
-	// 	log.Fatal("Error in struct")
-	// }
-
-	// w.Write(jData)
+	return json.NewEncoder(w).Encode(r.data)
 }

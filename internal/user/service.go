@@ -3,82 +3,96 @@ package user
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
+	"ticket-booking/internal/repository"
+	"ticket-booking/internal/user/models"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
-	Get(id int64) *Account
-	GetMany(filters any) []*Account
-	Create(ctx context.Context, user *AccountIn) *Account
-	GetByEmail(email string, password string) *Account
+	Get(id uuid.UUID) (*models.User, error)
+	GetMany(filters any) []*models.User
+	Create(
+		ctx context.Context,
+		user *models.CreateUserParams,
+	) (*models.User, error)
+	GetUserAuthByEmail(
+		ctx context.Context,
+		email string,
+	) (*models.UserAuth, error)
 }
 
-func NewService(repo Repository) Service {
-	return &userService{Repo: repo}
+func NewService(
+	repo repository.UserRepository,
+	logger *slog.Logger,
+) Service {
+	return &userService{Repo: repo, logger: logger}
 }
 
 type userService struct {
-	Repo Repository
+	Repo   repository.UserRepository
+	logger *slog.Logger
 }
 
-func (service *userService) hashPassword(password string) (string, error) {
+func (s *userService) hashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
 }
 
-func (service *userService) verifyPassword(hashed string, password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
-	return err == nil
-}
-
-func (service *userService) Get(id int64) *Account {
-	value, err := service.Repo.Get(id)
+func (s *userService) Get(id uuid.UUID) (*models.User, error) {
+	value, err := s.Repo.Get(id)
 	if err != nil {
-		log.Fatal("Something wrong with repo")
+		return nil, err
 	}
-	return value
+	return value, nil
 }
 
-func (service *userService) GetMany(filters any) []*Account {
+func (s *userService) GetMany(filters any) []*models.User {
 	return nil
 }
 
-func (service *userService) GetUser() Account {
-	return Account{
-		ID:    1,
+func (s *userService) GetUser() models.User {
+	return models.User{
+		ID:    uuid.New(),
 		Name:  "Name",
 		Email: "Email",
 	}
 }
 
-func (service *userService) Create(ctx context.Context, user *AccountIn) *Account {
-	hashedPassword, err := service.hashPassword(user.Password)
+func (s *userService) Create(
+	ctx context.Context,
+	user *models.CreateUserParams,
+) (*models.User, error) {
+	hashedPassword, err := s.hashPassword(user.Password)
 
 	if err != nil {
-		log.Fatal("Cannot hash password")
+		return nil, err
 	}
 
-	u := &AccountIn{
-		Name:     user.Name,
-		Email:    user.Email,
-		Password: hashedPassword,
-	}
+	user.Password = hashedPassword
+	user.Role = models.Member
 
-	value, err := service.Repo.Create(ctx, u)
+	value, err := s.Repo.Create(ctx, user)
+
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
-		log.Fatal("Something wrong with repo")
+		return nil, err
 	}
 
-	return value
+	return value, nil
 }
 
-func (service *userService) authorization(user *Account) bool {
-	return true
-}
+func (s *userService) GetUserAuthByEmail(
+	ctx context.Context,
+	email string,
+) (*models.UserAuth, error) {
+	value, err := s.Repo.GetByEmail(ctx, email)
 
-func (s *userService) GetByEmail(email string, password string) *Account {
-	return nil
+	if err != nil {
+		return nil, err
+	}
+
+	return value, nil
 }

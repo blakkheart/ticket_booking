@@ -4,12 +4,12 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"ticket-booking/internal/auth/models"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
-
-var jwtSecretKey = []byte("super-duper-secret-key")
 
 func GetTokenFromPayload(r *http.Request) (string, error) {
 	reqToken := r.Header.Get("Authorization")
@@ -25,37 +25,89 @@ func GetTokenFromPayload(r *http.Request) (string, error) {
 }
 
 type Claims struct {
-	UserID int64  `json:"uid"`
-	Role   string `json:"role"`
+	UserID uuid.UUID `json:"uid"`
+	Role   string    `json:"role"`
 	jwt.RegisteredClaims
 }
 
 type JWTManager struct {
-	secret []byte
-	issuer string
-	ttl    time.Duration
+	secret     []byte
+	issuer     string
+	accessTTL  time.Duration
+	refreshTTL time.Duration
 }
 
-func NewJWTManager(secret string, issuer string, ttl time.Duration) *JWTManager {
+func NewJWTManager(
+	secret string,
+	issuer string,
+	accessTTL time.Duration,
+	refreshTTL time.Duration,
+) *JWTManager {
 	return &JWTManager{
-		secret: []byte(secret),
-		issuer: issuer,
-		ttl:    ttl,
+		secret:     []byte(secret),
+		issuer:     issuer,
+		accessTTL:  accessTTL,
+		refreshTTL: refreshTTL,
 	}
 }
 
-func (j *JWTManager) Generate(userID int64, role string) (string, error) {
+func (j *JWTManager) generateTokenWithTTL(
+	userID uuid.UUID,
+	role string,
+	ttl time.Duration,
+) (string, error) {
+	expiresAt := time.Now().Add(ttl)
 	claims := Claims{
 		UserID: userID,
 		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    j.issuer,
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.ttl)),
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(j.secret)
+}
+
+func (j *JWTManager) GenerateAccessToken(
+	userID uuid.UUID,
+	role string,
+) (string, error) {
+	accessToken, err := j.generateTokenWithTTL(userID, role, j.accessTTL)
+	if err != nil {
+		return "", err
+	}
+	return accessToken, nil
+}
+
+func (j *JWTManager) GenerateRefreshToken(
+	userID uuid.UUID,
+	role string,
+) (string, error) {
+	refreshToken, err := j.generateTokenWithTTL(userID, role, j.refreshTTL)
+	if err != nil {
+		return "", err
+	}
+	return refreshToken, nil
+}
+
+func (j *JWTManager) GenerateTokenPair(
+	userID uuid.UUID,
+	role string,
+) (*models.JWTTokens, error) {
+	accessToken, err := j.GenerateAccessToken(userID, role)
+	if err != nil {
+		return nil, err
+	}
+	refreshToken, err := j.GenerateRefreshToken(userID, role)
+	if err != nil {
+		return nil, err
+	}
+	return &models.JWTTokens{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
 }
 
 func (j *JWTManager) Parse(tokenStr string) (*Claims, error) {
@@ -67,9 +119,13 @@ func (j *JWTManager) Parse(tokenStr string) (*Claims, error) {
 		},
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
 		jwt.WithExpirationRequired(),
+		jwt.WithIssuer(j.issuer),
 	)
 
 	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return nil, ErrTokenExpired
+		}
 		return nil, err
 	}
 

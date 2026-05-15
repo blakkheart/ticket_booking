@@ -7,7 +7,10 @@ import (
 )
 
 type UserHandler interface {
-	CreateAccount(w http.ResponseWriter, r *http.Request)
+	CreateAccount(
+		w http.ResponseWriter,
+		r *http.Request,
+	) (httpx.Response, error)
 	Routes(r *httpx.Router)
 }
 
@@ -20,6 +23,6 @@ func NewHandler(service user.Service) UserHandler {
 }
 
 func (h *userHandler) Routes(r *httpx.Router) {
-	r.Handle(http.MethodPost, "/register", h.CreateAccount)
+	r.Handle(http.MethodPost, "/user/register", h.CreateAccount)
 
 }

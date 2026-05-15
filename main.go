@@ -1,12 +1,16 @@
 package main
 
 import (
-	"log"
+	"context"
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
-	"ticket-booking/config"
 	"ticket-booking/internal/app"
 	"ticket-booking/internal/auth"
+	"ticket-booking/internal/config"
 	"ticket-booking/internal/infrastructure/postgres"
 	"ticket-booking/internal/server"
 
@@ -14,25 +18,58 @@ import (
 )
 
 func main() {
+	config.InitConfigs()
 
-	config.ReadConfigs()
+	opts := &slog.HandlerOptions{
+		Level:     slog.LevelDebug,
+		AddSource: true,
+	}
+	var logger *slog.Logger
+	if config.AppConfigs.App.Env == "local" {
+		handler := slog.NewTextHandler(os.Stdout, opts)
+		logger = slog.New(handler)
+	} else {
+		handler := slog.NewJSONHandler(os.Stdout, opts)
+		logger = slog.New(handler)
+	}
+	slog.SetDefault(logger)
 
 	authEnforcer, authErr := casbin.NewEnforcer(
-		"./config/casbin/auth_model.conf",
-		"./config/casbin/policy.csv",
+		"./internal/config/casbin/auth_model.conf",
+		"./internal/config/casbin/policy.csv",
 	)
 	if authErr != nil {
-		log.Fatal(authErr)
+		slog.Error("Error occured while initializing authentication", "error", authErr)
 	}
 
-	jwt := auth.NewJWTManager(config.AuthConfig.SecretKey, "test", time.Duration(1000000000000))
+	jwt := auth.NewJWTManager(
+		config.AppConfigs.Auth.SecretKey,
+		config.AppConfigs.Auth.Issuer,
+		config.AppConfigs.Auth.TokenDuration,
+		24*90*time.Hour,
+	)
 
-	dbPool := postgres.CreateConnection(&config.DBConfig)
+	dbPool := postgres.CreateConnection(&config.AppConfigs.DB)
 	defer dbPool.Close()
 
-	app := app.NewApp(dbPool, jwt)
-	s := server.NewServer(app)
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
+	defer stop()
 
-	s.Run(config.ServerConfig.SiteHost, authEnforcer, jwt)
+	app := app.NewApp(dbPool, jwt, logger)
+	s := server.NewServer(app, logger)
 
+	if err := s.Run(
+		ctx,
+		config.AppConfigs.Server.GetAddress(),
+		authEnforcer,
+		jwt,
+	); err != nil {
+		logger.Error("Server failed", "error", err)
+	}
+
+	slog.Info("Application stopped")
 }

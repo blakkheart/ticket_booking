@@ -2,21 +2,41 @@ package userapi
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"ticket-booking/internal/httpx"
-	"ticket-booking/internal/user"
+	"ticket-booking/internal/user/models"
+
+	"github.com/google/uuid"
 )
 
-func (h *userHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
-	var user user.AccountIn
-	status := http.StatusOK
+func (h *userHandler) CreateAccount(
+	w http.ResponseWriter,
+	r *http.Request,
+) (httpx.Response, error) {
+	var uRequest models.CreateUserRequest
 
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		log.Fatal("Parsing Error")
+	if err := json.NewDecoder(r.Body).Decode(&uRequest); err != nil {
+		return nil, httpx.ErrInvalidRequestBody
 	}
 
-	u := h.service.Create(r.Context(), &user)
-	httpx.WriteJsonResponse(w, u, status)
+	userModel := &models.CreateUserParams{
+		ID:       uuid.New(),
+		Name:     uRequest.Name,
+		Email:    uRequest.Email,
+		Password: uRequest.Password,
+	}
+
+	u, err := h.service.Create(r.Context(), userModel)
+
+	if err != nil {
+		return nil, ResolveHTTPError(err)
+	}
+
+	u_resp := models.UserResponse{
+		ID:    u.ID.String(),
+		Email: u.Email,
+		Role:  string(u.Role),
+	}
+
+	return httpx.NewResponse(u_resp, http.StatusOK), nil
 }

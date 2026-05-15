@@ -1,31 +1,39 @@
 package server
 
 import (
-	"fmt"
+	"context"
+	"log/slog"
 	"net/http"
+	"time"
 
 	"ticket-booking/internal/app"
 	"ticket-booking/internal/auth"
 	"ticket-booking/internal/httpx"
+	"ticket-booking/internal/httpx/middleware"
 	authapi "ticket-booking/internal/server/auth"
 	bookingapi "ticket-booking/internal/server/booking"
 	eventapi "ticket-booking/internal/server/event"
 	ticketapi "ticket-booking/internal/server/ticket"
 	userapi "ticket-booking/internal/server/user"
-	"ticket-booking/middleware"
 
 	"github.com/casbin/casbin/v2"
 )
 
 type Server interface {
-	Run(addr string, authEnforcer *casbin.Enforcer, jwt *auth.JWTManager)
+	Run(
+		ctx context.Context,
+		addr string,
+		authEnforcer *casbin.Enforcer,
+		jwt *auth.JWTManager,
+	) error
 }
 
 type server struct {
 	router *http.ServeMux
+	logger *slog.Logger
 }
 
-func NewServer(a *app.App) Server {
+func NewServer(a *app.App, logger *slog.Logger) Server {
 	mux := http.NewServeMux()
 
 	userHandler := userapi.NewHandler(a.User)
@@ -47,22 +55,56 @@ func NewServer(a *app.App) Server {
 
 	return &server{
 		router: mux,
+		logger: logger,
 	}
 }
 
-func (s *server) Run(addr string, authEnforcer *casbin.Enforcer, jwt *auth.JWTManager) {
+func (s *server) Run(
+	ctx context.Context,
+	addr string,
+	authEnforcer *casbin.Enforcer,
+	jwt *auth.JWTManager,
+) error {
 
 	handler := middleware.Chain(
 		s.router,
+		middleware.RecoveryMiddleware,
 		middleware.RequestIDMiddleware,
 		middleware.LoggingMiddleware,
 		middleware.Authorizer(authEnforcer, jwt),
 	)
 
-	fmt.Println("Server started")
-
-	err := http.ListenAndServe(addr, handler)
-	if err != nil {
-		fmt.Println("Error starting the server:", err)
+	server := &http.Server{
+		Addr:    addr,
+		Handler: handler,
 	}
+
+	errCh := make(chan error, 1)
+
+	go func(errCh chan<- error) {
+		s.logger.Info("Server started", "addr", addr)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			errCh <- err
+			return
+		}
+		errCh <- nil
+	}(errCh)
+
+	select {
+	case <-ctx.Done():
+		s.logger.Info("Shutdown signal received")
+
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			return err
+		}
+
+		return nil
+
+	case err := <-errCh:
+		return err
+	}
+
 }

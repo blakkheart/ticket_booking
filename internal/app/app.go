@@ -1,10 +1,13 @@
 package app
 
 import (
+	"log/slog"
 	"ticket-booking/internal/auth"
 	"ticket-booking/internal/booking"
+	bookingitems "ticket-booking/internal/booking_items"
 	"ticket-booking/internal/event"
-	"ticket-booking/internal/infrastructure/postgres"
+	"ticket-booking/internal/infrastructure/postgres/repository"
+	postgresuow "ticket-booking/internal/infrastructure/postgres/uow"
 	"ticket-booking/internal/ticket"
 	"ticket-booking/internal/user"
 
@@ -12,33 +15,52 @@ import (
 )
 
 type App struct {
-	User    user.Service
-	Event   event.Service
-	Ticket  ticket.Service
-	Booking booking.Service
-	Auth    auth.Service
+	User         user.Service
+	Event        event.Service
+	Ticket       ticket.Service
+	BookingItems bookingitems.Service
+	Booking      booking.Service
+	Auth         auth.Service
 }
 
-func NewApp(pool *pgxpool.Pool, jwt *auth.JWTManager) *App {
-	userRepo := postgres.NewUserRepository(pool)
-	userService := user.NewService(userRepo)
+func NewApp(
+	pool *pgxpool.Pool,
+	jwt *auth.JWTManager,
+	logger *slog.Logger,
+) *App {
+	uowManager := postgresuow.NewManager(pool, logger)
 
-	eventRepo := postgres.NewEventRepository(pool)
-	eventService := event.NewService(eventRepo)
+	userRepo := repository.NewUserRepository(pool, logger)
+	userService := user.NewService(userRepo, logger)
 
-	ticketRepo := postgres.NewTicketRepository(pool)
-	ticketService := ticket.NewService(ticketRepo)
+	eventRepo := repository.NewEventRepository(pool, logger)
+	eventService := event.NewService(eventRepo, logger)
 
-	bookingRepo := postgres.NewBookingRepository(pool)
-	bookingService := booking.NewService(bookingRepo)
+	ticketRepo := repository.NewTicketRepository(pool, logger)
+	ticketService := ticket.NewService(ticketRepo, logger)
 
-	authService := auth.NewService(jwt, userService)
+	bookingItemsRepo := repository.NewBookingItemsRepository(pool, logger)
+	bookingItemsService := bookingitems.NewService(bookingItemsRepo, logger)
+
+	bookingRepo := repository.NewBookingRepository(pool, logger)
+	bookingService := booking.NewService(
+		bookingRepo,
+		eventRepo,
+		bookingItemsRepo,
+		ticketService,
+		uowManager,
+		logger,
+	)
+
+	authRepo := repository.NewAuthRepository(pool, logger)
+	authService := auth.NewService(authRepo, jwt, userService, logger)
 
 	return &App{
-		User:    userService,
-		Event:   eventService,
-		Ticket:  ticketService,
-		Booking: bookingService,
-		Auth:    authService,
+		User:         userService,
+		Event:        eventService,
+		Ticket:       ticketService,
+		BookingItems: bookingItemsService,
+		Booking:      bookingService,
+		Auth:         authService,
 	}
 }

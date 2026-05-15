@@ -1,0 +1,24 @@
+app:
+  name: ticket-booking
+  env: local
+
+db:
+  host: localhost
+  port: 5432
+  user: tssdr
+  name: booking
+  password: tssdr
+  sslmode: disable
+
+server:
+  host: 0.0.0.0
+  port: 8080
+
+auth:
+  secret_key: supersecret
+  token_duration: 24h
+  issuer: "test"
+
+payment:
+  provider: mock # stripe etc
+  secret: "test_secret"

@@ -2,45 +2,82 @@ package event
 
 import (
 	"context"
-	"log"
+	"log/slog"
+	"ticket-booking/internal/event/models"
+	"ticket-booking/internal/repository"
+
+	"github.com/google/uuid"
 )
 
 type Service interface {
-	Get(id int64) *Event
-	GetMany(filters any) []*Event
-	Create(ctx context.Context, user *Event) *Event
+	Get(
+		ctx context.Context,
+		id uuid.UUID,
+	) (*models.Event, error)
+	GetMany(
+		ctx context.Context,
+		filters *models.EventFilter,
+	) []*models.Event
+	Create(
+		ctx context.Context,
+		e *models.EventIn,
+	) (*models.Event, error)
+	UpdateById(
+		ctx context.Context,
+		id uuid.UUID,
+		e *models.EventUpdate,
+	) (*models.Event, error)
 }
 
-func NewService(repo Repository) Service {
-	return &eventService{Repo: repo}
+func NewService(
+	repo repository.EventRepository,
+	logger *slog.Logger,
+) Service {
+	return &eventService{Repo: repo, logger: logger}
 }
 
 type eventService struct {
-	Repo Repository
+	Repo   repository.EventRepository
+	logger *slog.Logger
 }
 
-func (service *eventService) Get(id int64) *Event {
-	value, err := service.Repo.Get(id)
+func (service *eventService) Get(ctx context.Context, id uuid.UUID) (*models.Event, error) {
+	event, err := service.Repo.Get(ctx, id)
 	if err != nil {
-		log.Fatal("Something wrong with repo")
+		return nil, err
 	}
-	return value
+	return event, nil
 }
 
-func (service *eventService) GetMany(filters any) []*Event {
-	return nil
-}
-
-func (service *eventService) Create(ctx context.Context, user *Event) *Event {
-
-	u := &Event{
-		ID: 1,
-	}
-
-	value, err := service.Repo.Create(ctx, u)
+func (service *eventService) GetMany(ctx context.Context, filters *models.EventFilter) []*models.Event {
+	events, err := service.Repo.GetMany(ctx, filters)
 	if err != nil {
-		log.Fatal("Something wrong with repo")
+		return nil
+	}
+	return events
+}
+
+func (service *eventService) Create(
+	ctx context.Context,
+	e *models.EventIn,
+) (*models.Event, error) {
+
+	event, err := service.Repo.Create(ctx, e)
+	if err != nil {
+		return nil, err
 	}
 
-	return value
+	return event, nil
+}
+
+func (service *eventService) UpdateById(
+	ctx context.Context,
+	id uuid.UUID,
+	e *models.EventUpdate,
+) (*models.Event, error) {
+	event, err := service.Repo.UpdateById(ctx, id, e)
+	if err != nil {
+		return nil, err
+	}
+	return event, nil
 }
